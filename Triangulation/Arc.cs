@@ -71,6 +71,16 @@ namespace PoliX.Triangulation
                 return false;
         }
 
+        public Node GetSecondNode(Node _firstnode)
+        {
+            if (A == _firstnode)
+                return A;
+            else if (B == _firstnode)
+                return B;
+            else
+                return null;
+        }
+
         private static double Direction(Vector2 pi, Vector2 pj, Vector2 pk)
         {
             return Vector2.crossProduct((pk - pi), (pj - pi));
@@ -82,5 +92,8 @@ namespace PoliX.Triangulation
             else
                 return false;
         }
+
+
+
     }
 }

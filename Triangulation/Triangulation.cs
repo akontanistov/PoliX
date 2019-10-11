@@ -18,13 +18,13 @@ namespace PoliX.Triangulation
 
         public Triangulation(Node _node0, Node _node1, Node _node2, Node _node3)
         {
-            if(IsDeloney(_node0, _node1, _node2, _node3))
+            if(IsDelaunay(_node0, _node1, _node2, _node3))
                 triangles.Add(new Triangle(_node0, _node1, _node2));
-            if (IsDeloney(_node0, _node2, _node3, _node1))
+            if (IsDelaunay(_node0, _node2, _node3, _node1))
                 triangles.Add(new Triangle(_node0, _node2, _node3));
-            if (IsDeloney(_node1, _node2, _node3, _node0))
+            if (IsDelaunay(_node1, _node2, _node3, _node0))
                 triangles.Add(new Triangle(_node1, _node2, _node3));
-            if (IsDeloney(_node0, _node1, _node3, _node2))
+            if (IsDelaunay(_node0, _node1, _node3, _node2))
                 triangles.Add(new Triangle(_node0, _node1, _node3));
 
             //Добавление ссылок на все ноды входящие в триангуляцию
@@ -356,7 +356,7 @@ namespace PoliX.Triangulation
             Node P3 = _T1.nodes[minIndexT1];
             Node P4 = _T2.nodes[minIndexT2];
 
-            //направляющее ребро, по нему определяется по какой части оболочки будут сращиваться триангуляции
+            //Определение первого ребра в цепочке внешних ребер в Т1 для сращивания 
             Arc courceArcT1 = null;
             Arc courceArcT2 = null;
             foreach (Arc arc in P1.arcs)
@@ -367,9 +367,38 @@ namespace PoliX.Triangulation
                     {
                         courceArcT1 = arc;
                     }
-                    else
-                        courceArcT2 = arc;
+                    //Определение ближайшей грани к соседней триангуляции
+                    else if((courceArcT1.GetSecondNode(P1).point - P2.point).sqrMagnitude() > (arc.GetSecondNode(P1).point - P2.point).sqrMagnitude())
+                    {
+                        courceArcT1 = arc;
+                    }
                 }
+            }
+
+            foreach (Arc arc in P2.arcs)
+            {
+                if (arc.isBorder)
+                {
+                    if (courceArcT2 == null)
+                    {
+                        courceArcT2 = arc;
+                    }
+                    //Определение ближайшей грани к соседней триангуляции
+                    else if ((courceArcT2.GetSecondNode(P2).point - P1.point).sqrMagnitude() > (arc.GetSecondNode(P2).point - P1.point).sqrMagnitude())
+                    {
+                        courceArcT2 = arc;
+                    }
+                }
+            }
+
+            //Определение последовательности крайних ребер которые будут сращиваться со смежной последовательностью противоположной триангуляции
+            List<Arc> borderArcsT1 = new List<Arc>();
+            List<Arc> borderArcsT2 = new List<Arc>();
+
+            Node curentNode = courceArcT1.GetSecondNode(P1);
+            while(curentNode != P3)
+            {
+
             }
 
 
@@ -424,7 +453,7 @@ namespace PoliX.Triangulation
         }
 
         //Проверка условия делоне через уравнение описанной окружности
-        public static bool IsDeloney(Node A, Node B, Node C, Node _CheckNode)
+        public static bool IsDelaunay(Node A, Node B, Node C, Node _CheckNode)
         {
             double x0 = _CheckNode.point.x;
             double y0 = _CheckNode.point.y;
