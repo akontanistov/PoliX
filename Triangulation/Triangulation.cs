@@ -395,23 +395,55 @@ namespace PoliX.Triangulation
             List<Arc> borderArcsT1 = new List<Arc>();
             List<Arc> borderArcsT2 = new List<Arc>();
 
+            borderArcsT1.Add(courceArcT1);
             Node curentNode = courceArcT1.GetSecondNode(P1);
-            while(curentNode != P3)
-            {
 
+            for (int i = 0; i < borderArcsT1.Count; i++)
+            {
+                if(curentNode != P3)
+                {
+                    borderArcsT1.Add(curentNode.GetSecondBorderArc(borderArcsT1[i]));
+                    curentNode = borderArcsT1[i + 1].GetSecondNode(curentNode);
+                }
             }
 
+            borderArcsT2.Add(courceArcT2);
+            curentNode = courceArcT2.GetSecondNode(P2);
 
+            for (int i = 0; i < borderArcsT2.Count; i++)
+            {
+                if (curentNode != P4)
+                {
+                    borderArcsT2.Add(curentNode.GetSecondBorderArc(borderArcsT2[i]));
+                    curentNode = borderArcsT2[i + 1].GetSecondNode(curentNode);
+                }
+            }
 
-            //Начальные ребра объединяющие триангуляции
-            //Arc topArc = Node.GetCommonArc(P1, P2);
-            //Arc bottomArc = Node.GetCommonArc(P3, P4);
+            //Определение большего массива
+            List<Arc> borderArcsMax = null;
+            List<Arc> borderArcsMin = null;
+            Arc curentArc = new Arc(P1, P2);
 
+            if (borderArcsT1.Count > borderArcsT2.Count)
+            { borderArcsMax = borderArcsT1; borderArcsMin = borderArcsT2; }
+            else
+            { borderArcsMax = borderArcsT2; borderArcsMin = borderArcsT1; }
 
-
+            for (int i = 0; i < borderArcsMax.Count; i++)
+            {
+                if (i < borderArcsMin.Count - 1)
+                {
+                    newTriang.triangles.Add(new Triangle(curentArc, borderArcsMin[i], ref curentArc));
+                    newTriang.triangles.Add(new Triangle(curentArc, borderArcsMax[i], ref curentArc));
+                }
+                else
+                {
+                    //Создание из текущего ребра и оставшихся ребер большего массива
+                    newTriang.triangles.Add(new Triangle(curentArc, borderArcsMax[i], ref curentArc));
+                }
+            }
 
             return newTriang;
-            
         }
 
         //Объединяет две триангуляции без перестроения связей

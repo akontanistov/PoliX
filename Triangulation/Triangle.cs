@@ -79,12 +79,63 @@ namespace PoliX.Triangulation
                 if (arcs[i].trAB == null)
                     arcs[i].trAB = this;
                 else if (arcs[i].trBA == null)
+                {
                     arcs[i].trBA = this;
+                    arcs[i].isBorder = false;
+                }
                 else
                     Console.WriteLine("Проблемы с Triangle(Arc _a, Arc _b, Arc _c)");
             }
 
             centroid = nodes[2].point - ((nodes[2].point - (nodes[0].point + ((nodes[1].point - nodes[0].point) * 0.5f))) * 0.6666666f);
         }
+
+        //Создает триугольник из двух связанных ребер, и возвращает ссылку на третье новое созданное ребро
+        public Triangle(Arc _a, Arc _b, ref Arc newArc)
+        {
+            Arc _c = null;
+
+            if (_a.A == _b.A)
+                _c = new Arc(_a.B, _b.B);
+            else if (_a.A == _b.B)
+                _c = new Arc(_a.B, _b.A);
+            else if (_a.B == _b.A)
+                _c = new Arc(_a.A, _b.B);
+            else
+                _c = new Arc(_a.A, _b.A);
+
+            newArc = _c;
+
+            arcs[0] = _a;
+            arcs[1] = _b;
+            arcs[2] = _c;
+
+            //поиск ссылок на ноды треугольника
+            nodes[0] = arcs[0].A;
+            nodes[1] = arcs[0].B;
+
+            if (arcs[1].A != nodes[0] && arcs[1].A != nodes[1])
+                nodes[2] = arcs[1].A;
+            else
+                nodes[2] = arcs[1].B;
+
+            //Запись ссылок на данный треугольник в ребра
+            for (int i = 0; i < 2; i++)
+            {
+                if (arcs[i].trAB == null)
+                    arcs[i].trAB = this;
+                else if (arcs[i].trBA == null)
+                {
+                    arcs[i].trBA = this;
+                    arcs[i].isBorder = false;
+                }
+                else
+                    Console.WriteLine("Проблемы с Triangle(Arc _a, Arc _b,ref Arc _c)");
+            }
+
+            centroid = nodes[2].point - ((nodes[2].point - (nodes[0].point + ((nodes[1].point - nodes[0].point) * 0.5f))) * 0.6666666f);
+
+        }
+
     }
 }

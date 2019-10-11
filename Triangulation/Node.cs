@@ -34,5 +34,15 @@ namespace PoliX.Triangulation
             return null;
         }
 
+        public Arc GetSecondBorderArc(Arc firstArc)
+        {
+            foreach (Arc arc in arcs)
+            {
+                if (arc.isBorder && arc != firstArc)
+                    return arc;
+            }
+            return null;
+        }
+
     }
 }
