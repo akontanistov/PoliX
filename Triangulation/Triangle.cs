@@ -30,16 +30,39 @@ namespace PoliX.Triangulation
             nodes[2] = _c;
 
             //Создание ребер и передача ссылок на них в ноды
-            arcs[0] = new Arc(_a, _b);
-            nodes[0].arcs.Add(arcs[0]);
-            nodes[1].arcs.Add(arcs[0]);
-            arcs[1] = new Arc(_a, _c);
-            nodes[0].arcs.Add(arcs[1]);
-            nodes[2].arcs.Add(arcs[1]);
-            arcs[2] = new Arc(_b, _c);
-            nodes[1].arcs.Add(arcs[2]);
-            nodes[2].arcs.Add(arcs[2]);
+            //Проверка, существует ли между нодами ребро
 
+            Arc curentArc = Arc.ArcBetweenNodes(_a, _b);
+            if (curentArc == null)
+            {
+                arcs[0] = new Arc(_a, _b);
+            }
+            else
+            {
+                arcs[0] = curentArc;
+            }
+
+            curentArc = null;
+            curentArc = Arc.ArcBetweenNodes(_a, _c);
+            if (curentArc == null)
+            {
+                arcs[1] = new Arc(_a, _c);
+            }
+            else
+            {
+                arcs[1] = curentArc;
+            }
+
+            curentArc = null;
+            curentArc = Arc.ArcBetweenNodes(_b, _c);
+            if (curentArc == null)
+            {
+                arcs[2] = new Arc(_b, _c);
+            }
+            else
+            {
+                arcs[2] = curentArc;
+            }
 
             //Добавление ссылок на данный треугольник во все ребра
             for (int i = 0; i < 3; i++)

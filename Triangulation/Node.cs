@@ -13,9 +13,6 @@ namespace PoliX.Triangulation
         //Ссылки на ребра в которые входит данный узел
         public List<Arc> arcs = new List<Arc>();
 
-        //Ссылки на треугольники в которые входит данный узел
-        //public List<Triangle> triangles = new List<Triangle>();
-
         public Node(Vector2 _point)
         {
             point = _point;

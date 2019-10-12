@@ -9,8 +9,6 @@ namespace PoliX.Triangulation
     public class Triangulation
     {
         public List<Node> nodes = new List<Node>();
-        public List<Arc> arcs = new List<Arc>();
-        public List<Arc> arcsBorder = new List<Arc>();
         public List<Triangle> triangles = new List<Triangle>();
 
         public Triangulation()
@@ -27,39 +25,22 @@ namespace PoliX.Triangulation
             if (IsDelaunay(_node0, _node1, _node3, _node2))
                 triangles.Add(new Triangle(_node0, _node1, _node3));
 
+            nodes.Add(_node0);
+            nodes.Add(_node1);
+            nodes.Add(_node2);
+            nodes.Add(_node3);
+
             //Добавление ссылок на все ноды входящие в триангуляцию
-            for (int i = 0; i < triangles.Count; i++)
-            {
-                for (int j = 0; j < triangles[i].nodes.Length; j++)
-                {
-                    if (!nodes.Contains(triangles[i].nodes[j]))
-                    {
-                        nodes.Add(triangles[i].nodes[j]);
-                    }
-                }
-            }
-
-            //Добавление ссылок на все ребра входящие в триангуляцию
-            for (int i = 0; i < triangles.Count; i++)
-            {
-                for (int j = 0; j < triangles[i].arcs.Length; j++)
-                {
-                    if (!arcs.Contains(triangles[i].arcs[j]))
-                    {
-                        arcs.Add(triangles[i].arcs[j]);
-                    }
-                }
-            }
-
-            //Поиск границ триангулции в виде массива ребер
-            for (int i = 0; i < arcs.Count; i++)
-            {
-                if (arcs[i].isBorder)
-                {
-                    arcsBorder.Add(arcs[i]);
-                }
-            }
-
+            //for (int i = 0; i < triangles.Count; i++)
+            //{
+            //    for (int j = 0; j < triangles[i].nodes.Length; j++)
+            //    {
+            //        if (!nodes.Contains(triangles[i].nodes[j]))
+            //        {
+            //            nodes.Add(triangles[i].nodes[j]);
+            //        }
+            //    }
+            //}
         }
 
         private Triangulation(Triangle _triangle)
@@ -69,29 +50,19 @@ namespace PoliX.Triangulation
             nodes.Add(_triangle.nodes[1]);
             nodes.Add(_triangle.nodes[2]);
 
-            //Добавление ссылок на все ноды входящие в триангуляцию
-            for (int i = 0; i < triangles.Count; i++)
-            {
-                for (int j = 0; j < triangles[i].nodes.Length; j++)
-                {
-                    if (!nodes.Contains(triangles[i].nodes[j]))
-                    {
-                        nodes.Add(triangles[i].nodes[j]);
-                    }
-                }
-            }
+            ////Удалить
+            ////Добавление ссылок на все ноды входящие в триангуляцию
+            //for (int i = 0; i < triangles.Count; i++)
+            //{
+            //    for (int j = 0; j < triangles[i].nodes.Length; j++)
+            //    {
+            //        if (!nodes.Contains(triangles[i].nodes[j]))
+            //        {
+            //            nodes.Add(triangles[i].nodes[j]);
+            //        }
+            //    }
+            //}
 
-            //Добавление ссылок на все ребра входящие в триангуляцию
-            for (int i = 0; i < triangles.Count; i++)
-            {
-                for (int j = 0; j < triangles[i].arcs.Length; j++)
-                {
-                    if (!arcs.Contains(triangles[i].arcs[j]))
-                    {
-                        arcs.Add(triangles[i].arcs[j]);
-                    }
-                }
-            }
         }
 
         public static Triangulation Triangulate(List<Node> _nodes, bool _isHorizontalDivide)
@@ -396,11 +367,16 @@ namespace PoliX.Triangulation
             List<Arc> borderArcsT2 = new List<Arc>();
 
             borderArcsT1.Add(courceArcT1);
+
             Node curentNode = courceArcT1.GetSecondNode(P1);
 
             for (int i = 0; i < borderArcsT1.Count; i++)
             {
-                if(curentNode != P3)
+                if (curentNode == P3)
+                {
+                    break;
+                }
+                else
                 {
                     borderArcsT1.Add(curentNode.GetSecondBorderArc(borderArcsT1[i]));
                     curentNode = borderArcsT1[i + 1].GetSecondNode(curentNode);
@@ -412,7 +388,11 @@ namespace PoliX.Triangulation
 
             for (int i = 0; i < borderArcsT2.Count; i++)
             {
-                if (curentNode != P4)
+                if (curentNode == P4)
+                {
+                    break;
+                }
+                else
                 {
                     borderArcsT2.Add(curentNode.GetSecondBorderArc(borderArcsT2[i]));
                     curentNode = borderArcsT2[i + 1].GetSecondNode(curentNode);
@@ -469,16 +449,6 @@ namespace PoliX.Triangulation
             foreach (Node node in _T2.nodes)
             {
                 newTriang.nodes.Add(node);
-            }
-
-            foreach (Arc arc in _T1.arcs)
-            {
-                newTriang.arcs.Add(arc);
-            }
-
-            foreach (Arc arc in _T2.arcs)
-            {
-                newTriang.arcs.Add(arc);
             }
 
             return newTriang;

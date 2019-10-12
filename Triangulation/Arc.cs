@@ -71,12 +71,23 @@ namespace PoliX.Triangulation
                 return false;
         }
 
+        //Существует ли между точками ребро
+        public static Arc ArcBetweenNodes(Node _a, Node _b)
+        {
+            for (int i = 0; i < _a.arcs.Count; i++)
+            {
+                if (_a.arcs[i].A == _b || _a.arcs[i].B == _b)
+                    return _a.arcs[i];
+            }
+            return null;
+        }
+
         public Node GetSecondNode(Node _firstnode)
         {
             if (A == _firstnode)
-                return A;
-            else if (B == _firstnode)
                 return B;
+            else if (B == _firstnode)
+                return A;
             else
                 return null;
         }

@@ -106,7 +106,7 @@ namespace PoliX
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             for (int i = 0; i < Nodes.Count; i++)
             {
-                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Nodes[i].point.x, (int)Nodes[i].point.y, 3, 3);
+                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Nodes[i].point.x, (int)Nodes[i].point.y, 20, 20);
             }
             sourceImg.Source = Helper.Bitmap2BitmapImage(pBitmapForPoints);
 
