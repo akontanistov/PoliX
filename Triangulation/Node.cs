@@ -8,7 +8,10 @@ namespace PoliX.Triangulation
 {
     public class Node //Узел
     {
-        public Vector2 point;
+        public int TestID = 0;
+
+
+        readonly public Vector2 point;
 
         //Ссылки на ребра в которые входит данный узел
         public List<Arc> arcs = new List<Arc>();
@@ -35,7 +38,7 @@ namespace PoliX.Triangulation
         {
             foreach (Arc arc in arcs)
             {
-                if (arc.isBorder && arc != firstArc)
+                if (arc.IsBorder && arc != firstArc)
                     return arc;
             }
             return null;

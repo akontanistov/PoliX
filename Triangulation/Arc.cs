@@ -9,11 +9,9 @@ namespace PoliX.Triangulation
 {
     public class Arc //Ребро
     {
+
         public Node A;
         public Node B;
-
-        //Ребро является границей триангуляции если не ссылается на 2 треугольника
-        public bool isBorder = true;
 
         public Vector2 AB;
 
@@ -22,6 +20,19 @@ namespace PoliX.Triangulation
         public Triangle trBA;
 
         public double sqrMagnitude;
+
+        //Ребро является границей триангуляции если не ссылается на 2 треугольника
+        public bool IsBorder
+        {
+            get
+            {
+                if (trAB == null || trBA == null)
+                    return true;
+                else
+                    return false;
+            }
+            set { }
+        }
 
         public Arc()
         { }
@@ -49,6 +60,7 @@ namespace PoliX.Triangulation
             p3 = a2.A.point;
             p4 = a2.B.point;
 
+            //Перепроверить CrossProduct
             double d1 = Direction(p3, p4, p1);
             double d2 = Direction(p3, p4, p2);
             double d3 = Direction(p1, p2, p3);
@@ -94,7 +106,7 @@ namespace PoliX.Triangulation
 
         private static double Direction(Vector2 pi, Vector2 pj, Vector2 pk)
         {
-            return Vector2.crossProduct((pk - pi), (pj - pi));
+            return Vector2.CrossProduct((pk - pi), (pj - pi));
         }
         private static bool OnSegment(Vector2 pi, Vector2 pj, Vector2 pk)
         {

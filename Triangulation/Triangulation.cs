@@ -30,17 +30,6 @@ namespace PoliX.Triangulation
             nodes.Add(_node2);
             nodes.Add(_node3);
 
-            //Добавление ссылок на все ноды входящие в триангуляцию
-            //for (int i = 0; i < triangles.Count; i++)
-            //{
-            //    for (int j = 0; j < triangles[i].nodes.Length; j++)
-            //    {
-            //        if (!nodes.Contains(triangles[i].nodes[j]))
-            //        {
-            //            nodes.Add(triangles[i].nodes[j]);
-            //        }
-            //    }
-            //}
         }
 
         private Triangulation(Triangle _triangle)
@@ -246,116 +235,86 @@ namespace PoliX.Triangulation
         {
             Triangulation newTriang = Triangulation.TriangulationMergeSimple(_T1,_T2);
 
-            //Поиск общих касательных для триангуляций. Вертикальных либо горизонтальных, в зависимости от расположения триагуляций
-            int maxIndexT1 = 0;
-            int maxIndexT2 = 0;
-            int minIndexT1 = 0;
-            int minIndexT2 = 0;
+            Node P1 = _T1.nodes[0];
+            Node P2 = _T2.nodes[0];
+            Node P3 = _T1.nodes[0];
+            Node P4 = _T2.nodes[0];
 
-            double maxValue = 0;
-            double minValue = 0;
-
-            for (int i = 0; i < _T1.nodes.Count; i++)
-            {
-                //Поиск самой верхней ноды каждой триангуляции
-                if (_isHorisontal)
+            //Если пространство делится по ширине осуществляется поиск самых верхних и нижних точек, иначе левых и правых
+            if (_isHorisontal)
+                for(int i = 0; i < _T1.nodes.Count; i++)
                 {
-                    if (maxValue < _T1.nodes[i].point.y)
-                    {
-                        maxValue = _T1.nodes[i].point.y;
-                        maxIndexT1 = i;
-                    }
-                    if (minValue > _T1.nodes[i].point.y)
-                    {
-                        minValue = _T1.nodes[i].point.y;
-                        minIndexT1 = i;
-                    }
+                    if(P1.point.y < _T1.nodes[i].point.y)
+                        P1 = _T1.nodes[i];
+                    if (P3.point.y > _T1.nodes[i].point.y)
+                        P3 = _T1.nodes[i];
                 }
-                //Поиск самой левой ноды каждой триангуляции
-                else
+            else
+                for (int i = 0; i < _T1.nodes.Count; i++)
                 {
-                    if (maxValue < _T1.nodes[i].point.x)
-                    {
-                        maxValue = _T1.nodes[i].point.x;
-                        maxIndexT1 = i;
-                    }
-                    if (minValue > _T1.nodes[i].point.x)
-                    {
-                        minValue = _T1.nodes[i].point.x;
-                        minIndexT1 = i;
-                    }
+                    if (P1.point.x < _T1.nodes[i].point.x)
+                        P1 = _T1.nodes[i];
+                    if (P3.point.x > _T1.nodes[i].point.x)
+                        P3 = _T1.nodes[i];
                 }
-            }
 
-            maxValue = 0;
-            minValue = 0;
-
-            for (int i = 0; i < _T2.nodes.Count; i++)
-            {
-                //Поиск самой верхней ноды каждой триангуляции
-                if (_isHorisontal)
+            if (_isHorisontal)
+                for (int i = 0; i < _T2.nodes.Count; i++)
                 {
-                    if (maxValue < _T2.nodes[i].point.y)
-                    {
-                        maxValue = _T2.nodes[i].point.y;
-                        maxIndexT2 = i;
-                    }
-                    if (minValue > _T2.nodes[i].point.y)
-                    {
-                        minValue = _T2.nodes[i].point.y;
-                        minIndexT2 = i;
-                    }
+                    if (P2.point.y < _T2.nodes[i].point.y)
+                        P2 = _T2.nodes[i];
+                    if (P4.point.y > _T2.nodes[i].point.y)
+                        P4 = _T2.nodes[i];
                 }
-                //Поиск самой левой ноды каждой триангуляции
-                else
+            else
+                for (int i = 0; i < _T2.nodes.Count; i++)
                 {
-                    if (maxValue < _T2.nodes[i].point.x)
-                    {
-                        maxValue = _T2.nodes[i].point.x;
-                        maxIndexT2 = i;
-                    }
-                    if (minValue > _T2.nodes[i].point.x)
-                    {
-                        minValue = _T2.nodes[i].point.x;
-                        minIndexT2 = i;
-                    }
+                    if (P2.point.x < _T2.nodes[i].point.x)
+                        P2 = _T2.nodes[i];
+                    if (P4.point.x > _T2.nodes[i].point.x)
+                        P4 = _T2.nodes[i];
                 }
-            }
 
-            Node P1 = _T1.nodes[maxIndexT1];
-            Node P2 = _T2.nodes[maxIndexT2];
-            Node P3 = _T1.nodes[minIndexT1];
-            Node P4 = _T2.nodes[minIndexT2];
+            P1.TestID = 1;
+            P2.TestID = 1;
+            P3.TestID = 2;
+            P4.TestID = 2;
 
             //Определение первого ребра в цепочке внешних ребер в Т1 для сращивания 
+            //Для этого определяется ребро которое образовывает меньший угол с ребром P1P2
             Arc courceArcT1 = null;
-            Arc courceArcT2 = null;
+            Vector2 P1P2 = P2.point - P1.point;
+
             foreach (Arc arc in P1.arcs)
             {
-                if (arc.isBorder)
+                if (arc.IsBorder)
                 {
                     if (courceArcT1 == null)
                     {
                         courceArcT1 = arc;
                     }
-                    //Определение ближайшей грани к соседней триангуляции
-                    else if((courceArcT1.GetSecondNode(P1).point - P2.point).sqrMagnitude() > (arc.GetSecondNode(P1).point - P2.point).sqrMagnitude())
+                    else if (Vector2.AngleBetweenVectors(courceArcT1.GetSecondNode(P1).point - P1.point, P1P2) > Vector2.AngleBetweenVectors(arc.GetSecondNode(P1).point - P1.point, P1P2))
                     {
                         courceArcT1 = arc;
                     }
+
                 }
             }
 
+            //Определение первого ребра в цепочке внешних ребер в Т2 для сращивания 
+            //Для этого определяется ребро которое образовывает меньший угол с ребром P2P1
+            Arc courceArcT2 = null;
+            Vector2 P2P1 = P1.point - P2.point;
+
             foreach (Arc arc in P2.arcs)
             {
-                if (arc.isBorder)
+                if (arc.IsBorder)
                 {
                     if (courceArcT2 == null)
                     {
                         courceArcT2 = arc;
                     }
-                    //Определение ближайшей грани к соседней триангуляции
-                    else if ((courceArcT2.GetSecondNode(P2).point - P1.point).sqrMagnitude() > (arc.GetSecondNode(P2).point - P1.point).sqrMagnitude())
+                    else if (Vector2.AngleBetweenVectors(courceArcT2.GetSecondNode(P2).point - P2.point, P2P1) > Vector2.AngleBetweenVectors(arc.GetSecondNode(P2).point - P2.point, P2P1))
                     {
                         courceArcT2 = arc;
                     }
@@ -403,6 +362,7 @@ namespace PoliX.Triangulation
             List<Arc> borderArcsMax = null;
             List<Arc> borderArcsMin = null;
             Arc curentArc = new Arc(P1, P2);
+            
 
             if (borderArcsT1.Count > borderArcsT2.Count)
             { borderArcsMax = borderArcsT1; borderArcsMin = borderArcsT2; }
@@ -411,9 +371,10 @@ namespace PoliX.Triangulation
 
             for (int i = 0; i < borderArcsMax.Count; i++)
             {
-                if (i < borderArcsMin.Count - 1)
+                if (i < borderArcsMin.Count)
                 {
                     newTriang.triangles.Add(new Triangle(curentArc, borderArcsMin[i], ref curentArc));
+
                     newTriang.triangles.Add(new Triangle(curentArc, borderArcsMax[i], ref curentArc));
                 }
                 else
@@ -425,6 +386,57 @@ namespace PoliX.Triangulation
 
             return newTriang;
         }
+
+
+        //1) Найти минимальный отрезок между триангуляциями
+        //2) Создать массив всех граничных точек расположенный последовательно от соответствующих точек минимального отрезка для каждой триангуляции.
+        //   Для Т1 массив против часовой стрелки, для Т2 по часовой
+        //3) Начать строительство новых треугольников от минимального отрезка по массивам граничных точек, до тех пор пока не будет создан отрезок непересекающий ни с одним граничным отрезком обоих триангуляций
+        public static Triangulation TriangulationMerge2(Triangulation _T1, Triangulation _T2, bool _isHorisontal)
+        {
+            Triangulation newTriang = Triangulation.TriangulationMergeSimple(_T1, _T2);
+
+            //Ближайшие точки
+            Node P1T1 = null;
+            Node P1T2 = null;
+
+            //Граничные ребра последовательно от точек P1T1 и P1T2 соответственно 
+            List<Arc> BorderNodesT1;
+            List<Arc> BorderNodesT2;
+
+            //Граничные ребра последовательно от точек P1T1 и P1T2 соответственно 
+            List<Arc> arcsT1;
+            List<Arc> arcsT2;
+
+            //Получение любой крайней точки
+            for (int i = 0; i <  _T1.triangles.Count && P1T1 == null; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (_T1.triangles[i].arcs[j].IsBorder)
+                    {
+                        P1T1 = _T1.triangles[i].arcs[j].A;
+                        break;
+                    }
+                }
+            }
+            for (int i = 0; i < _T2.triangles.Count && P1T2 == null; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (_T2.triangles[i].arcs[j].IsBorder)
+                    {
+                        P1T2 = _T2.triangles[i].arcs[j].A;
+                        break;
+                    }
+                }
+            }
+            //Предварительное заполнение массивов граничных ребер
+
+
+                return newTriang;
+        }
+
 
         //Объединяет две триангуляции без перестроения связей
         public static Triangulation TriangulationMergeSimple(Triangulation _T1, Triangulation _T2)

@@ -151,6 +151,54 @@ namespace PoliX
                                         new PointF((float)Triangles[s].nodes[2].point.x, (float)Triangles[s].nodes[2].point.y)
                                         });
             }
+            //Отрисовка граничных ребер, дебаг
+            for (int s = 0; s < Triangles.Count; s++)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (Triangles[s].arcs[i].IsBorder)
+                    {
+                        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Red),
+                            (float)Triangles[s].arcs[i].A.point.x, (float)Triangles[s].arcs[i].A.point.y,
+                            (float)Triangles[s].arcs[i].B.point.x, (float)Triangles[s].arcs[i].B.point.y);
+                    }
+                    if (Triangles[s].nodes[i].TestID == 1)
+                    {
+                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Green), (int)Triangles[s].nodes[i].point.x, (int)Triangles[s].nodes[i].point.y, 20, 20);
+                    }
+                    if (Triangles[s].nodes[i].TestID == 2)
+                    {
+                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Red), (int)Triangles[s].nodes[i].point.x, (int)Triangles[s].nodes[i].point.y, 20, 20);
+                    }
+                    if (Triangles[s].nodes[i].TestID == 0)
+                    {
+                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Gold), (int)Triangles[s].nodes[i].point.x, (int)Triangles[s].nodes[i].point.y, 20, 20);
+                    }
+
+                    if (true)
+                    {
+                        string AB;
+                        string BA;
+
+                        if (Triangles[s].arcs[i].trAB == null)
+                            AB = "-";
+                        else
+                            AB = "+";
+
+                        if (Triangles[s].arcs[i].trBA == null)
+                            BA = "-";
+                        else
+                            BA = "+";
+
+
+                        Console.WriteLine(AB + " " + BA + " " + Triangles[s].arcs[i].IsBorder);
+                    }
+
+                }
+            }
+            graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.GhostWhite), 100, 100, 20, 20);
+
+
             sourceImg.Source = Helper.Bitmap2BitmapImage(pointsBitmap);
         }
 

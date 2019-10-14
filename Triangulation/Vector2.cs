@@ -28,6 +28,11 @@ namespace PoliX
             return (x * x + y * y);
         }
 
+        public double Magnitude()
+        {
+            return Math.Sqrt(x * x + y * y);
+        }
+
         public static Vector2 operator-(Vector2 _a, Vector2 _b)
         {
             return new Vector2(_a.x - _b.x, _a.y - _b.y);
@@ -43,9 +48,20 @@ namespace PoliX
             return new Vector2(_a.x * s, _a.y * s);
         }
 
-        public static double crossProduct(Vector2 v1, Vector2 v2)
+        //Ошибка?
+        public static double CrossProduct(Vector2 v1, Vector2 v2) //Векторное произведение
         {
             return v1.x * v2.y - v2.x * v1.y;
+        }
+
+        public static double DotProduct(Vector2 v1, Vector2 v2) //Скалярное произведение
+        {
+            return v1.x * v2.x + v2.y * v1.y;
+        }
+
+        public static double AngleBetweenVectors(Vector2 v1, Vector2 v2)
+        {
+            return Math.Acos(Vector2.DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude()));
         }
 
         public static Vector2 Vector2Rnd(Double RangeXmin, Double RangeXmax, Double RangeYmin, Double RangeYmax)

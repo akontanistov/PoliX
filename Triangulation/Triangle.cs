@@ -31,7 +31,6 @@ namespace PoliX.Triangulation
 
             //Создание ребер и передача ссылок на них в ноды
             //Проверка, существует ли между нодами ребро
-
             Arc curentArc = Arc.ArcBetweenNodes(_a, _b);
             if (curentArc == null)
             {
@@ -73,7 +72,7 @@ namespace PoliX.Triangulation
                 }
                 else if (arcs[i].trBA == null)
                 {
-                    arcs[i].isBorder = false;
+                    arcs[i].IsBorder = false;
                     arcs[i].trBA = this;
                 }
             }
@@ -104,7 +103,7 @@ namespace PoliX.Triangulation
                 else if (arcs[i].trBA == null)
                 {
                     arcs[i].trBA = this;
-                    arcs[i].isBorder = false;
+                    arcs[i].IsBorder = false;
                 }
                 else
                     Console.WriteLine("Проблемы с Triangle(Arc _a, Arc _b, Arc _c)");
@@ -143,17 +142,15 @@ namespace PoliX.Triangulation
                 nodes[2] = arcs[1].B;
 
             //Запись ссылок на данный треугольник в ребра
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
             {
                 if (arcs[i].trAB == null)
                     arcs[i].trAB = this;
                 else if (arcs[i].trBA == null)
                 {
                     arcs[i].trBA = this;
-                    arcs[i].isBorder = false;
+                    arcs[i].IsBorder = false;
                 }
-                else
-                    Console.WriteLine("Проблемы с Triangle(Arc _a, Arc _b,ref Arc _c)");
             }
 
             centroid = nodes[2].point - ((nodes[2].point - (nodes[0].point + ((nodes[1].point - nodes[0].point) * 0.5f))) * 0.6666666f);
