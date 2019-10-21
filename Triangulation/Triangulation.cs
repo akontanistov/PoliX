@@ -240,7 +240,8 @@ namespace PoliX.Triangulation
             Node P3 = _T1.nodes[0];
             Node P4 = _T2.nodes[0];
 
-            //Если пространство делится по ширине осуществляется поиск самых верхних и нижних точек, иначе левых и правых
+            //Определение касательных ребер между триангуляции. В зависимости от разбиения простарства определяются либо самые верхние и нижние точки
+            //Либо крайние левые и правые точки.
             if (_isHorisontal)
                 for(int i = 0; i < _T1.nodes.Count; i++)
                 {
@@ -274,6 +275,13 @@ namespace PoliX.Triangulation
                     if (P4.point.x > _T2.nodes[i].point.x)
                         P4 = _T2.nodes[i];
                 }
+
+            //Выше описанный подход не гарантирует определение крайних точек триангуляции, но имеет наименьшую алгоритмическую сложность
+            //В дополнении к выше описанному алгоритму, проверяются соседние точки с предварительно определенными касательными точками
+
+
+
+
 
             P1.TestID = 1;
             P2.TestID = 1;
@@ -401,40 +409,13 @@ namespace PoliX.Triangulation
             Node P1T2 = null;
 
             //Граничные ребра последовательно от точек P1T1 и P1T2 соответственно 
-            List<Arc> BorderNodesT1;
-            List<Arc> BorderNodesT2;
-
-            //Граничные ребра последовательно от точек P1T1 и P1T2 соответственно 
             List<Arc> arcsT1;
             List<Arc> arcsT2;
 
-            //Получение любой крайней точки
-            for (int i = 0; i <  _T1.triangles.Count && P1T1 == null; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (_T1.triangles[i].arcs[j].IsBorder)
-                    {
-                        P1T1 = _T1.triangles[i].arcs[j].A;
-                        break;
-                    }
-                }
-            }
-            for (int i = 0; i < _T2.triangles.Count && P1T2 == null; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (_T2.triangles[i].arcs[j].IsBorder)
-                    {
-                        P1T2 = _T2.triangles[i].arcs[j].A;
-                        break;
-                    }
-                }
-            }
-            //Предварительное заполнение массивов граничных ребер
+            GetNearestNodes(_T1,_T2, out P1T1, out P1T2);
 
-
-                return newTriang;
+            ы
+            return newTriang;
         }
 
 
@@ -464,6 +445,88 @@ namespace PoliX.Triangulation
             }
 
             return newTriang;
+        }
+
+        //Возвращает пару самых ближних точек между триангуляциями
+        public static void GetNearestNodes(Triangulation _T1, Triangulation _T2, out Node P1, out Node P2)
+        {
+            Node curentNodeT1 = null;
+            Node curentNodeT2 = null;
+            double CurentLength = Double.MaxValue;
+            double Length = 0;
+
+            List<Node> BorderNodesT1 = GetBorderNodes(_T1);
+            List<Node> BorderNodesT2 = GetBorderNodes(_T2);
+
+            for (int i = 0; i < BorderNodesT1.Count; i++)
+            { 
+                for(int j = 0; j < BorderNodesT2.Count; j++)
+                {
+                    Length = (BorderNodesT1[i].point - BorderNodesT2[j].point).sqrMagnitude();
+                    if (CurentLength > Length)
+                    {
+                        CurentLength = Length;
+                        curentNodeT1 = BorderNodesT1[i];
+                        curentNodeT2 = BorderNodesT2[j];
+                    }
+                }
+            }
+
+            P1 = curentNodeT1;
+            P2 = curentNodeT2;
+        }
+
+        //Возвращает крайние точки триангуляции раположенные последовательно
+        public static List<Node> GetBorderNodes(Triangulation _T)
+        {
+            List<Node> BorderNodes = new List<Node>();
+
+            Arc curentBorderArc = null;
+
+            for (int i = 0; i < _T.triangles.Count && curentBorderArc == null; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (_T.triangles[i].arcs[j].IsBorder)
+                    { 
+                        curentBorderArc = _T.triangles[i].arcs[j];
+                        break;
+                    }
+                }
+            }
+
+            Node curentNode = null;
+            BorderNodes.Add(curentBorderArc.A);
+            for (int i = 0; i < BorderNodes.Count; i++)
+            {
+                curentNode = curentBorderArc.GetSecondNode(BorderNodes[i]);
+                if (curentNode != BorderNodes[0])
+                {
+                    BorderNodes.Add(curentNode);
+                    curentBorderArc = BorderNodes[i + 1].GetSecondBorderArc(curentBorderArc);
+                }
+                else
+                    break;
+            }
+
+
+            return BorderNodes;
+        }
+
+        public static List<Arc> GetBorderArcs(Triangulation _T)
+        {
+            List<Arc> BorderArcs = new List<Arc>();
+
+            for (int i = 0; i < _T.triangles.Count; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (_T.triangles[i].arcs[j].IsBorder)
+                        BorderArcs.Add(_T.triangles[i].arcs[j]);
+                }
+            }
+
+            return BorderArcs;
         }
 
         //Проверка условия делоне через уравнение описанной окружности

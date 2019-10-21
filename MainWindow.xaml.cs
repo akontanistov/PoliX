@@ -106,7 +106,7 @@ namespace PoliX
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             for (int i = 0; i < Nodes.Count; i++)
             {
-                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Nodes[i].point.x, (int)Nodes[i].point.y, 20, 20);
+                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Nodes[i].point.x-5, (int)Nodes[i].point.y-5, 10, 10);
             }
             sourceImg.Source = Helper.Bitmap2BitmapImage(pBitmapForPoints);
 
@@ -164,15 +164,15 @@ namespace PoliX
                     }
                     if (Triangles[s].nodes[i].TestID == 1)
                     {
-                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Green), (int)Triangles[s].nodes[i].point.x, (int)Triangles[s].nodes[i].point.y, 20, 20);
+                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Green), (int)Triangles[s].nodes[i].point.x-5, (int)Triangles[s].nodes[i].point.y-5, 10, 10);
                     }
                     if (Triangles[s].nodes[i].TestID == 2)
                     {
-                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Red), (int)Triangles[s].nodes[i].point.x, (int)Triangles[s].nodes[i].point.y, 20, 20);
+                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Red), (int)Triangles[s].nodes[i].point.x-5, (int)Triangles[s].nodes[i].point.y-5, 10, 10);
                     }
                     if (Triangles[s].nodes[i].TestID == 0)
                     {
-                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Gold), (int)Triangles[s].nodes[i].point.x, (int)Triangles[s].nodes[i].point.y, 20, 20);
+                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Gold), (int)Triangles[s].nodes[i].point.x-5, (int)Triangles[s].nodes[i].point.y-5, 10, 10);
                     }
 
                     if (true)
