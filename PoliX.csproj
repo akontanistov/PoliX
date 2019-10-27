@@ -75,7 +75,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Triangulation\Arc.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Triangulation\Node.cs" />
     <Compile Include="Triangulation\Triangle.cs" />

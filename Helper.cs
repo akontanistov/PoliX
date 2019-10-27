@@ -29,7 +29,7 @@ namespace PoliX
 
         public static Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
         {
-            // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
+            //BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
 
             using (MemoryStream outStream = new MemoryStream())
             {

@@ -13,7 +13,7 @@
         <Border BorderBrush="SkyBlue" BorderThickness="1" HorizontalAlignment="Left" Width="200">
             <Grid HorizontalAlignment="Left" Width="200">
                 <Button x:Name="button" BorderBrush="SkyBlue" Content="Load image" Margin="50,10,0,0" VerticalAlignment="Top" Click="b_loadImg" HorizontalAlignment="Left" Width="102"/>
-                <TextBox x:Name="tbPoints" BorderBrush="SkyBlue" HorizontalAlignment="Left" Height="20" Margin="101,40,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="50"/>
+                <TextBox x:Name="tbPoints" BorderBrush="SkyBlue" HorizontalAlignment="Left" Height="20" Margin="101,40,0,0" TextWrapping="Wrap" Text="50" VerticalAlignment="Top" Width="50"/>
                 <Label x:Name="label" Content="Points:" HorizontalAlignment="Left" Margin="50,35,0,0" VerticalAlignment="Top" Width="50" Height="26"/>
                 <Button x:Name="button2" BorderBrush="SkyBlue" Content="Generate points" Margin="50,70,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="102" Click="b_loadPoints"/>
                 <Button x:Name="button1" BorderBrush="SkyBlue" Content="Triangulation" HorizontalAlignment="Left" Margin="50,100,0,0" VerticalAlignment="Top" Width="100" Click="b_triangulation"/>

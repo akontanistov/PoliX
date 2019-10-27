@@ -8,538 +8,118 @@ namespace PoliX.Triangulation
 {
     public class Triangulation
     {
-        public List<Node> nodes = new List<Node>();
+        public List<Vector2> points = new List<Vector2>();
         public List<Triangle> triangles = new List<Triangle>();
 
-        public Triangulation()
-        { }
-
-        public Triangulation(Node _node0, Node _node1, Node _node2, Node _node3)
+        public Triangulation(List<Vector2> _points)
         {
-            if(IsDelaunay(_node0, _node1, _node2, _node3))
-                triangles.Add(new Triangle(_node0, _node1, _node2));
-            if (IsDelaunay(_node0, _node2, _node3, _node1))
-                triangles.Add(new Triangle(_node0, _node2, _node3));
-            if (IsDelaunay(_node1, _node2, _node3, _node0))
-                triangles.Add(new Triangle(_node1, _node2, _node3));
-            if (IsDelaunay(_node0, _node1, _node3, _node2))
-                triangles.Add(new Triangle(_node0, _node1, _node3));
+            points = _points;
+            //Добавление суперструктуры
+            triangles.Add(new Triangle(points[0], points[1], points[3]));
+            triangles.Add(new Triangle(points[1], points[2], points[3]));
 
-            nodes.Add(_node0);
-            nodes.Add(_node1);
-            nodes.Add(_node2);
-            nodes.Add(_node3);
+            Triangle CurentTriangle = null;
+            Triangle NewTriangle1 = null;
+            Triangle NewTriangle2 = null;
+            Vector2 CurentPoint = null;
 
+
+            for (int i = 4; i < _points.Count; i++)
+            {
+                CurentTriangle = GetTriangleForPoint(_points[i]);
+
+                if (CurentTriangle != null)
+                {
+                    //Для ускорения алгоритма, найденный треугольник не удаляется, а становится одним из трех новых
+
+                    //Изменение текущего треугольника: третья точка треугольника зменяется но новую
+                    CurentPoint = CurentTriangle.points[2];
+                    CurentTriangle.points[2] = _points[i];
+
+                    //Дополнительно создаются два треугольника из двух первоначальных точек текущего треугольника и новой точки
+                    NewTriangle1 = new Triangle(CurentTriangle.points[1], CurentPoint, _points[i]);
+                    NewTriangle2 = new Triangle(CurentTriangle.points[0], CurentPoint, _points[i]);
+
+
+                    //Новым треугольникам передаются ссылки на соседей текущего
+                    NewTriangle1.triangles[1] = CurentTriangle.triangles[1];
+                    NewTriangle2.triangles[2] = CurentTriangle.triangles[2];
+
+                    //Соседним треугольникам передаются ссылки на новые треугольники
+                    for (int j = 0; j < 3; j++)
+                        if (CurentTriangle.triangles[1] != null)
+                            if (CurentTriangle.triangles[1].triangles[j] != null)
+                                if (CurentTriangle.triangles[1].triangles[j] == CurentTriangle)
+                                    CurentTriangle.triangles[1].triangles[j] = NewTriangle1;
+
+                    for (int j = 0; j < 3; j++)
+                        if (CurentTriangle.triangles[2] != null)
+                            if (CurentTriangle.triangles[2].triangles[j] != null)
+                                if (CurentTriangle.triangles[2].triangles[j] == CurentTriangle)
+                                    CurentTriangle.triangles[2].triangles[j] = NewTriangle2;
+
+                    //Передача ссылок друг на друга для новых треугольников
+                    CurentTriangle.triangles[1] = NewTriangle1;
+                    CurentTriangle.triangles[2] = NewTriangle2;
+
+                    NewTriangle1.triangles[0] = CurentTriangle;
+                    NewTriangle1.triangles[2] = NewTriangle2;
+
+                    NewTriangle2.triangles[0] = CurentTriangle;
+                    NewTriangle2.triangles[1] = NewTriangle1;
+
+
+                    triangles.Add(NewTriangle1);
+                    triangles.Add(NewTriangle2);
+
+
+                    //triangles.Remove(CurentTriangle);
+                    //triangles.Add(new Triangle(CurentTriangle.points[0], CurentTriangle.points[1], _points[i]));
+                    //triangles.Add(new Triangle(CurentTriangle.points[1], CurentTriangle.points[2], _points[i]));
+                    //triangles.Add(new Triangle(CurentTriangle.points[2], CurentTriangle.points[0], _points[i]));
+                }
+
+            }
         }
 
-        private Triangulation(Triangle _triangle)
+        //Возвращает триугольник в котором находится данная точка
+        private Triangle GetTriangleForPoint(Vector2 _point)
         {
-            triangles.Add(_triangle);
-            nodes.Add(_triangle.nodes[0]);
-            nodes.Add(_triangle.nodes[1]);
-            nodes.Add(_triangle.nodes[2]);
-
-            ////Удалить
-            ////Добавление ссылок на все ноды входящие в триангуляцию
-            //for (int i = 0; i < triangles.Count; i++)
-            //{
-            //    for (int j = 0; j < triangles[i].nodes.Length; j++)
-            //    {
-            //        if (!nodes.Contains(triangles[i].nodes[j]))
-            //        {
-            //            nodes.Add(triangles[i].nodes[j]);
-            //        }
-            //    }
-            //}
-
+            for(int i = 0; i < triangles.Count; i++)
+            {
+                if (IsPointInTriangle(triangles[i], _point))
+                    return triangles[i];
+            }
+            return null;
         }
 
-        public static Triangulation Triangulate(List<Node> _nodes, bool _isHorizontalDivide)
+        private bool IsPointInTriangle(Triangle _triangle, Vector2 _point)
         {
-            //Обеспечивает чередование направления деления пространства при рекурсивном выполнении алгоритма.
-            bool isHorizontalDivide = _isHorizontalDivide;
+            Vector2 P1 = _triangle.points[0];
+            Vector2 P2 = _triangle.points[1];
+            Vector2 P3 = _triangle.points[2];
+            Vector2 P4 = _point;
 
-            if (_nodes.Count == 3)
-            {
-                return new Triangulation(new Triangle(_nodes[0], _nodes[1], _nodes[2]));
-            }
-            else if (_nodes.Count == 4)
-            {
-                return new Triangulation(_nodes[0], _nodes[1], _nodes[2], _nodes[3]);
-            }
-            else if (_nodes.Count == 8)
-            {
-                double[] key = new double[8];
-                Node[] _nodesSorted = new Node[8];
+            double a = (P1.x - P4.x) * (P2.y - P1.y) - (P2.x - P1.x) * (P1.y - P4.y);
+            double b = (P2.x - P4.x) * (P3.y - P2.y) - (P3.x - P2.x) * (P2.y - P4.y);
+            double c = (P3.x - P4.x) * (P1.y - P3.y) - (P1.x - P3.x) * (P3.y - P4.y);
 
-                for (int i = 0; i < 8; i++)
-                {
-                    _nodesSorted[i] = _nodes[i];
-                    if(isHorizontalDivide)
-                        key[i] = _nodes[i].point.x;
-                    else
-                        key[i] = _nodes[i].point.y;
-                }
-
-                Array.Sort(key, _nodesSorted);
-
-                List<Node> nodes1 = new List<Node>();
-                List<Node> nodes2 = new List<Node>();
-
-                for (int i = 0; i < 8; i++)
-                {
-                    if (i < 4)
-                        nodes1.Add(_nodesSorted[i]);
-                    else
-                        nodes2.Add(_nodesSorted[i]);
-                }
-
-                return TriangulationMerge(Triangulate(nodes1, !isHorizontalDivide), Triangulate(nodes2, !isHorizontalDivide), isHorizontalDivide);
-            }
-            else if (_nodes.Count < 12)
-            {
-                double[] key = new double[_nodes.Count];
-                Node[] _nodesSorted = new Node[_nodes.Count];
-
-                for (int i = 0; i < _nodes.Count; i++)
-                {
-                    _nodesSorted[i] = _nodes[i];
-                    if (isHorizontalDivide)
-                        key[i] = _nodes[i].point.x;
-                    else
-                        key[i] = _nodes[i].point.y;
-                }
-
-                Array.Sort(key, _nodesSorted);
-
-                List<Node> node1 = new List<Node>();
-                List<Node> node2 = new List<Node>();
-
-                for (int i = 0; i < _nodes.Count; i++)
-                {
-                    if (i < 3)
-                        node1.Add(_nodesSorted[i]);
-                    else
-                        node2.Add(_nodesSorted[i]);
-                }
-
-                return TriangulationMerge(Triangulate(node1, !isHorizontalDivide), Triangulate(node2, !isHorizontalDivide), isHorizontalDivide);
-            }
-            else if (_nodes.Count >= 12)
-            {
-                double[] key = new double[_nodes.Count];
-                Node[] _pointsSorted = new Node[_nodes.Count];
-
-                for (int i = 0; i < _nodes.Count; i++)
-                {
-                    _pointsSorted[i] = _nodes[i];
-                    if (isHorizontalDivide)
-                        key[i] = _nodes[i].point.x;
-                    else
-                        key[i] = _nodes[i].point.y;
-                }
-
-                Array.Sort(key, _pointsSorted);
-
-                List<Node> node1 = new List<Node>();
-                List<Node> node2 = new List<Node>();
-
-                int firstListLength = _nodes.Count / 2;
-
-
-                for (int i = 0; i < _nodes.Count; i++)
-                {
-                    if (i < firstListLength)
-                        node1.Add(_pointsSorted[i]);
-                    else
-                        node2.Add(_pointsSorted[i]);
-                }
-
-                return TriangulationMerge(Triangulate(node1, !isHorizontalDivide), Triangulate(node2, !isHorizontalDivide), isHorizontalDivide);
-            }
+            if ((a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0))
+                return true;
             else
-            {
-                Console.WriteLine("Ошибка работы алгоритма триангуляции");
-                return new Triangulation();
-            }
+                return false;
         }
 
-        /**public static Triangulation TriangulateGreedy(List<Point> _points)
+        static bool IsDelaunay(Vector2 A, Vector2 B, Vector2 C, Vector2 _CheckNode)
         {
-            List<Arc> arcs = new List<Arc>();
-
-            //Создание списка всевозможных ребер
-            for(int i = 0; i < _points.Count; i++)
-            {
-                for (int j = i+1; j < _points.Count; j++)
-                {
-                    arcs.Add(new Arc(_points[i], _points[j]));
-                }
-            }
-
-            //Сравнить быстродействие
-            //Сортировка по убыванию
-            //var sortedArcs = from u in arcs
-            //                 orderby u.sqrMagnitude
-            //                select u;
-
-            double[] sqrDistSort = new double[arcs.Count];
-            Arc[] arcsSort = new Arc[arcs.Count];
-
-            for (int i = 0; i < arcs.Count; i++)
-            {
-                sqrDistSort[i] = arcs[i].sqrMagnitude;
-                arcsSort[i] = arcs[i];
-            }
-
-            Array.Sort(sqrDistSort, arcsSort);
-
-
-            //Поиск не пересекающихся ребер
-            List<Arc> arcsFinal = new List<Arc>();
-            arcsFinal.Add(arcsSort[0]);
-
-
-            for (int i = 0; i < arcsSort.Length; i++)
-            {
-                for (int j = 0; j < arcsFinal.Count; j++)
-                {
-                    if (!Arc.ArcIntersect(arcsSort[i], arcsSort[j]))
-                    {
-                        arcsFinal.Add(arcsSort[i]);
-                    }
-                }
-            }
-
-            //Преобразование ребер в триангуляцию
-            for (int i = 0; i < arcsFinal.Count; i++)
-            {
-                if (arcsFinal[i].trAB != null && arcsFinal[i].trBA != null)
-                    continue;
-
-
-
-            }
-
-
-        }
-        **/
-        
-        //возвращает список 
-        public static List<Arc> GetLinkedArcs(Arc targetArc, List<Arc> _arcs)
-        {
-            return new List<Arc>();
-        }
-
-        public static Triangulation TriangulationMerge(Triangulation _T1, Triangulation _T2, bool _isHorisontal)
-        {
-            Triangulation newTriang = Triangulation.TriangulationMergeSimple(_T1,_T2);
-
-            Node P1 = _T1.nodes[0];
-            Node P2 = _T2.nodes[0];
-            Node P3 = _T1.nodes[0];
-            Node P4 = _T2.nodes[0];
-
-            //Определение касательных ребер между триангуляции. В зависимости от разбиения простарства определяются либо самые верхние и нижние точки
-            //Либо крайние левые и правые точки.
-            if (_isHorisontal)
-                for(int i = 0; i < _T1.nodes.Count; i++)
-                {
-                    if(P1.point.y < _T1.nodes[i].point.y)
-                        P1 = _T1.nodes[i];
-                    if (P3.point.y > _T1.nodes[i].point.y)
-                        P3 = _T1.nodes[i];
-                }
-            else
-                for (int i = 0; i < _T1.nodes.Count; i++)
-                {
-                    if (P1.point.x < _T1.nodes[i].point.x)
-                        P1 = _T1.nodes[i];
-                    if (P3.point.x > _T1.nodes[i].point.x)
-                        P3 = _T1.nodes[i];
-                }
-
-            if (_isHorisontal)
-                for (int i = 0; i < _T2.nodes.Count; i++)
-                {
-                    if (P2.point.y < _T2.nodes[i].point.y)
-                        P2 = _T2.nodes[i];
-                    if (P4.point.y > _T2.nodes[i].point.y)
-                        P4 = _T2.nodes[i];
-                }
-            else
-                for (int i = 0; i < _T2.nodes.Count; i++)
-                {
-                    if (P2.point.x < _T2.nodes[i].point.x)
-                        P2 = _T2.nodes[i];
-                    if (P4.point.x > _T2.nodes[i].point.x)
-                        P4 = _T2.nodes[i];
-                }
-
-            //Выше описанный подход не гарантирует определение крайних точек триангуляции, но имеет наименьшую алгоритмическую сложность
-            //В дополнении к выше описанному алгоритму, проверяются соседние точки с предварительно определенными касательными точками
-
-
-
-
-
-            P1.TestID = 1;
-            P2.TestID = 1;
-            P3.TestID = 2;
-            P4.TestID = 2;
-
-            //Определение первого ребра в цепочке внешних ребер в Т1 для сращивания 
-            //Для этого определяется ребро которое образовывает меньший угол с ребром P1P2
-            Arc courceArcT1 = null;
-            Vector2 P1P2 = P2.point - P1.point;
-
-            foreach (Arc arc in P1.arcs)
-            {
-                if (arc.IsBorder)
-                {
-                    if (courceArcT1 == null)
-                    {
-                        courceArcT1 = arc;
-                    }
-                    else if (Vector2.AngleBetweenVectors(courceArcT1.GetSecondNode(P1).point - P1.point, P1P2) > Vector2.AngleBetweenVectors(arc.GetSecondNode(P1).point - P1.point, P1P2))
-                    {
-                        courceArcT1 = arc;
-                    }
-
-                }
-            }
-
-            //Определение первого ребра в цепочке внешних ребер в Т2 для сращивания 
-            //Для этого определяется ребро которое образовывает меньший угол с ребром P2P1
-            Arc courceArcT2 = null;
-            Vector2 P2P1 = P1.point - P2.point;
-
-            foreach (Arc arc in P2.arcs)
-            {
-                if (arc.IsBorder)
-                {
-                    if (courceArcT2 == null)
-                    {
-                        courceArcT2 = arc;
-                    }
-                    else if (Vector2.AngleBetweenVectors(courceArcT2.GetSecondNode(P2).point - P2.point, P2P1) > Vector2.AngleBetweenVectors(arc.GetSecondNode(P2).point - P2.point, P2P1))
-                    {
-                        courceArcT2 = arc;
-                    }
-                }
-            }
-
-            //Определение последовательности крайних ребер которые будут сращиваться со смежной последовательностью противоположной триангуляции
-            List<Arc> borderArcsT1 = new List<Arc>();
-            List<Arc> borderArcsT2 = new List<Arc>();
-
-            borderArcsT1.Add(courceArcT1);
-
-            Node curentNode = courceArcT1.GetSecondNode(P1);
-
-            for (int i = 0; i < borderArcsT1.Count; i++)
-            {
-                if (curentNode == P3)
-                {
-                    break;
-                }
-                else
-                {
-                    borderArcsT1.Add(curentNode.GetSecondBorderArc(borderArcsT1[i]));
-                    curentNode = borderArcsT1[i + 1].GetSecondNode(curentNode);
-                }
-            }
-
-            borderArcsT2.Add(courceArcT2);
-            curentNode = courceArcT2.GetSecondNode(P2);
-
-            for (int i = 0; i < borderArcsT2.Count; i++)
-            {
-                if (curentNode == P4)
-                {
-                    break;
-                }
-                else
-                {
-                    borderArcsT2.Add(curentNode.GetSecondBorderArc(borderArcsT2[i]));
-                    curentNode = borderArcsT2[i + 1].GetSecondNode(curentNode);
-                }
-            }
-
-            //Определение большего массива
-            List<Arc> borderArcsMax = null;
-            List<Arc> borderArcsMin = null;
-            Arc curentArc = new Arc(P1, P2);
-            
-
-            if (borderArcsT1.Count > borderArcsT2.Count)
-            { borderArcsMax = borderArcsT1; borderArcsMin = borderArcsT2; }
-            else
-            { borderArcsMax = borderArcsT2; borderArcsMin = borderArcsT1; }
-
-            for (int i = 0; i < borderArcsMax.Count; i++)
-            {
-                if (i < borderArcsMin.Count)
-                {
-                    newTriang.triangles.Add(new Triangle(curentArc, borderArcsMin[i], ref curentArc));
-
-                    newTriang.triangles.Add(new Triangle(curentArc, borderArcsMax[i], ref curentArc));
-                }
-                else
-                {
-                    //Создание из текущего ребра и оставшихся ребер большего массива
-                    newTriang.triangles.Add(new Triangle(curentArc, borderArcsMax[i], ref curentArc));
-                }
-            }
-
-            return newTriang;
-        }
-
-
-        //1) Найти минимальный отрезок между триангуляциями
-        //2) Создать массив всех граничных точек расположенный последовательно от соответствующих точек минимального отрезка для каждой триангуляции.
-        //   Для Т1 массив против часовой стрелки, для Т2 по часовой
-        //3) Начать строительство новых треугольников от минимального отрезка по массивам граничных точек, до тех пор пока не будет создан отрезок непересекающий ни с одним граничным отрезком обоих триангуляций
-        public static Triangulation TriangulationMerge2(Triangulation _T1, Triangulation _T2, bool _isHorisontal)
-        {
-            Triangulation newTriang = Triangulation.TriangulationMergeSimple(_T1, _T2);
-
-            //Ближайшие точки
-            Node P1T1 = null;
-            Node P1T2 = null;
-
-            //Граничные ребра последовательно от точек P1T1 и P1T2 соответственно 
-            List<Arc> arcsT1;
-            List<Arc> arcsT2;
-
-            GetNearestNodes(_T1,_T2, out P1T1, out P1T2);
-
-            ы
-            return newTriang;
-        }
-
-
-        //Объединяет две триангуляции без перестроения связей
-        public static Triangulation TriangulationMergeSimple(Triangulation _T1, Triangulation _T2)
-        {
-            Triangulation newTriang = new Triangulation();
-
-            foreach (Triangle triang in _T1.triangles)
-            {
-                newTriang.triangles.Add(triang);
-            }
-
-            foreach (Triangle triang in _T2.triangles)
-            {
-                newTriang.triangles.Add(triang);
-            }
-
-            foreach (Node node in _T1.nodes)
-            {
-                newTriang.nodes.Add(node);
-            }
-
-            foreach (Node node in _T2.nodes)
-            {
-                newTriang.nodes.Add(node);
-            }
-
-            return newTriang;
-        }
-
-        //Возвращает пару самых ближних точек между триангуляциями
-        public static void GetNearestNodes(Triangulation _T1, Triangulation _T2, out Node P1, out Node P2)
-        {
-            Node curentNodeT1 = null;
-            Node curentNodeT2 = null;
-            double CurentLength = Double.MaxValue;
-            double Length = 0;
-
-            List<Node> BorderNodesT1 = GetBorderNodes(_T1);
-            List<Node> BorderNodesT2 = GetBorderNodes(_T2);
-
-            for (int i = 0; i < BorderNodesT1.Count; i++)
-            { 
-                for(int j = 0; j < BorderNodesT2.Count; j++)
-                {
-                    Length = (BorderNodesT1[i].point - BorderNodesT2[j].point).sqrMagnitude();
-                    if (CurentLength > Length)
-                    {
-                        CurentLength = Length;
-                        curentNodeT1 = BorderNodesT1[i];
-                        curentNodeT2 = BorderNodesT2[j];
-                    }
-                }
-            }
-
-            P1 = curentNodeT1;
-            P2 = curentNodeT2;
-        }
-
-        //Возвращает крайние точки триангуляции раположенные последовательно
-        public static List<Node> GetBorderNodes(Triangulation _T)
-        {
-            List<Node> BorderNodes = new List<Node>();
-
-            Arc curentBorderArc = null;
-
-            for (int i = 0; i < _T.triangles.Count && curentBorderArc == null; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (_T.triangles[i].arcs[j].IsBorder)
-                    { 
-                        curentBorderArc = _T.triangles[i].arcs[j];
-                        break;
-                    }
-                }
-            }
-
-            Node curentNode = null;
-            BorderNodes.Add(curentBorderArc.A);
-            for (int i = 0; i < BorderNodes.Count; i++)
-            {
-                curentNode = curentBorderArc.GetSecondNode(BorderNodes[i]);
-                if (curentNode != BorderNodes[0])
-                {
-                    BorderNodes.Add(curentNode);
-                    curentBorderArc = BorderNodes[i + 1].GetSecondBorderArc(curentBorderArc);
-                }
-                else
-                    break;
-            }
-
-
-            return BorderNodes;
-        }
-
-        public static List<Arc> GetBorderArcs(Triangulation _T)
-        {
-            List<Arc> BorderArcs = new List<Arc>();
-
-            for (int i = 0; i < _T.triangles.Count; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (_T.triangles[i].arcs[j].IsBorder)
-                        BorderArcs.Add(_T.triangles[i].arcs[j]);
-                }
-            }
-
-            return BorderArcs;
-        }
-
-        //Проверка условия делоне через уравнение описанной окружности
-        public static bool IsDelaunay(Node A, Node B, Node C, Node _CheckNode)
-        {
-            double x0 = _CheckNode.point.x;
-            double y0 = _CheckNode.point.y;
-            double x1 = A.point.x;
-            double y1 = A.point.y;
-            double x2 = B.point.x;
-            double y2 = B.point.y;
-            double x3 = C.point.x;
-            double y3 = C.point.y;
+            double x0 = _CheckNode.x;
+            double y0 = _CheckNode.y;
+            double x1 = A.x;
+            double y1 = A.y;
+            double x2 = B.x;
+            double y2 = B.y;
+            double x3 = C.x;
+            double y3 = C.y;
 
             double[] matrix  = { (x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0), x1 - x0, y1 - y0,
                                  (x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0), x2 - x0, y2 - y0,
@@ -565,6 +145,28 @@ namespace PoliX.Triangulation
             }
         }
 
+        static void CheckDelaunayAndRebuild(Triangle T1)
+        {
+            Triangle CurentTriang = null;
+            Vector2 CurentPoint = null;
 
+            for (int i = 0; i < 3; i++)
+            {
+                CurentTriang = T1.triangles[i];
+
+                if (CurentTriang != null)
+                {
+                    CurentPoint = Triangle.Get4Point(T1, CurentTriang);
+                    if (CurentPoint != null)
+                        if (!IsDelaunay(T1.points[0], T1.points[1], T1.points[2], CurentPoint))
+                        {
+
+
+                        }
+
+                }
+            }
+
+        }
     }
 }

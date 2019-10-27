@@ -69,5 +69,18 @@ namespace PoliX
             return new Vector2(Helper.RndRange(RangeXmin, RangeXmax), Helper.RndRange(RangeYmin, RangeYmax));
         }
 
+        //Если Точка P2 находится слева от вектора (P1-P0) возвращает true
+        public static int isLeft(Vector2 P0, Vector2 P1, Vector2 P2)
+        {
+            double result = ((P1.x - P0.x) * (P2.y - P0.y) - (P2.x - P0.x) * (P1.y - P0.y));
+
+            if (result > 0d)
+                return 1;
+            else if (result < 0d)
+                return -1;
+            else
+                return 0; //Лежит на линии
+        }
+
     }
 }

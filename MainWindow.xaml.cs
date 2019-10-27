@@ -34,7 +34,7 @@ namespace PoliX
         BitmapImage sourceBitmapPicture;
         Bitmap pointsBitmap;
 
-        List<Node> Nodes = new List<Node>();
+        List<Vector2> Points = new List<Vector2>();
         List<Triangle> Triangles = new List<Triangle>();
 
         private int pointsCount = 0;
@@ -46,7 +46,7 @@ namespace PoliX
             sourceBitmapPictures = new List<BitmapImage>();
             sourceBitmapPicture = null;
             pointsBitmap = null;
-            Nodes.Clear();
+            Points.Clear();
             Triangles.Clear();
         }
 
@@ -84,18 +84,26 @@ namespace PoliX
                 Console.WriteLine("Создание точек");
 
             pointsCount = Int32.Parse(tbPoints.Text);
-
+            
             if (sourceBitmapPicture != null)
             {
                 widthSource = (double)(sourceBitmapPicture.PixelWidth);
                 heightSource = (double)(sourceBitmapPicture.PixelHeight);
             }
 
+            //Создание суперструктуры
+            Points.Add(new Vector2(0d, 0d));
+            Points.Add(new Vector2(widthSource, 0d));
+            Points.Add(new Vector2(widthSource, heightSource));
+            Points.Add(new Vector2(0d, heightSource));
+
             //Генерация случайных точек
             for (int i = 0; i < pointsCount; i++)
             {
-                Nodes.Add(new Triangulation.Node(Vector2.Vector2Rnd(0d, widthSource, 0d, heightSource)));
+                Points.Add(Vector2.Vector2Rnd(0d, widthSource, 0d, heightSource));
+                Console.WriteLine(Points[i].x + " " + Points[i].y);
             }
+            Console.WriteLine(" ");
 
             //Отрисовка карты точек
             if (debug)
@@ -104,9 +112,9 @@ namespace PoliX
             Bitmap pBitmapForPoints = Helper.BitmapImage2Bitmap(sourceBitmapPicture);
             var graphics = Graphics.FromImage(pBitmapForPoints);
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            for (int i = 0; i < Nodes.Count; i++)
+            for (int i = 0; i < Points.Count; i++)
             {
-                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Nodes[i].point.x-5, (int)Nodes[i].point.y-5, 10, 10);
+                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Gold), (int)Points[i].x-5, (int)Points[i].y-5, 10, 10);
             }
             sourceImg.Source = Helper.Bitmap2BitmapImage(pBitmapForPoints);
 
@@ -126,8 +134,12 @@ namespace PoliX
             if (debug)
                 Console.WriteLine("Начало триангуляции:");
 
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
             //Запуск процесса триангуляции
-            Triangulation.Triangulation triangulation = Triangulation.Triangulation.Triangulate(Nodes, true);
+            Triangulation.Triangulation triangulation = new Triangulation.Triangulation(Points);
+            sw.Stop();
+            Console.WriteLine("Time Taken-->{0}", sw.ElapsedMilliseconds);
 
             Triangles = triangulation.triangles;
 
@@ -146,62 +158,14 @@ namespace PoliX
             for (int s = 0; s < Triangles.Count; s++)
             {
                 graphics.FillPolygon(new System.Drawing.SolidBrush(Triangles[s].color),
-                                        new PointF[] {new PointF((float)Triangles[s].nodes[0].point.x, (float)Triangles[s].nodes[0].point.y),
-                                        new PointF((float)Triangles[s].nodes[1].point.x, (float)Triangles[s].nodes[1].point.y),
-                                        new PointF((float)Triangles[s].nodes[2].point.x, (float)Triangles[s].nodes[2].point.y)
+                                        new PointF[] {new PointF((float)Triangles[s].points[0].x, (float)Triangles[s].points[0].y),
+                                        new PointF((float)Triangles[s].points[1].x, (float)Triangles[s].points[1].y),
+                                        new PointF((float)Triangles[s].points[2].x, (float)Triangles[s].points[2].y)
                                         });
             }
-            //Отрисовка граничных ребер, дебаг
-            for (int s = 0; s < Triangles.Count; s++)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    if (Triangles[s].arcs[i].IsBorder)
-                    {
-                        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Red),
-                            (float)Triangles[s].arcs[i].A.point.x, (float)Triangles[s].arcs[i].A.point.y,
-                            (float)Triangles[s].arcs[i].B.point.x, (float)Triangles[s].arcs[i].B.point.y);
-                    }
-                    if (Triangles[s].nodes[i].TestID == 1)
-                    {
-                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Green), (int)Triangles[s].nodes[i].point.x-5, (int)Triangles[s].nodes[i].point.y-5, 10, 10);
-                    }
-                    if (Triangles[s].nodes[i].TestID == 2)
-                    {
-                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Red), (int)Triangles[s].nodes[i].point.x-5, (int)Triangles[s].nodes[i].point.y-5, 10, 10);
-                    }
-                    if (Triangles[s].nodes[i].TestID == 0)
-                    {
-                        graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Gold), (int)Triangles[s].nodes[i].point.x-5, (int)Triangles[s].nodes[i].point.y-5, 10, 10);
-                    }
-
-                    if (true)
-                    {
-                        string AB;
-                        string BA;
-
-                        if (Triangles[s].arcs[i].trAB == null)
-                            AB = "-";
-                        else
-                            AB = "+";
-
-                        if (Triangles[s].arcs[i].trBA == null)
-                            BA = "-";
-                        else
-                            BA = "+";
-
-
-                        Console.WriteLine(AB + " " + BA + " " + Triangles[s].arcs[i].IsBorder);
-                    }
-
-                }
-            }
-            graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.GhostWhite), 100, 100, 20, 20);
-
-
+ 
             sourceImg.Source = Helper.Bitmap2BitmapImage(pointsBitmap);
         }
-
 
         private void b_saveAsSVG(object sender, RoutedEventArgs e)
         {
@@ -235,12 +199,12 @@ namespace PoliX
                 {
                     curColorHEX = System.Drawing.ColorTranslator.ToHtml(Triangles[i].color);
                     streamWriter.WriteLine("<polygon fill=\"" + curColorHEX + "\"" + " stroke=\"" + curColorHEX + "\"" + " stroke-width=\"0\"" +  " points=\"" 
-                        +       Triangles[i].nodes[0].point.x.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
-                        + "," + Triangles[i].nodes[0].point.y.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
-                        + " " + Triangles[i].nodes[1].point.x.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
-                        + "," + Triangles[i].nodes[1].point.y.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
-                        + " " + Triangles[i].nodes[2].point.x.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
-                        + "," + Triangles[i].nodes[2].point.y.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
+                        +       Triangles[i].points[0].x.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
+                        + "," + Triangles[i].points[0].y.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
+                        + " " + Triangles[i].points[1].x.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
+                        + "," + Triangles[i].points[1].y.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
+                        + " " + Triangles[i].points[2].x.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
+                        + "," + Triangles[i].points[2].y.ToString("0.0000000", CultureInfo.GetCultureInfo("en-US")) 
                         + "\"/>");
                 }
 
@@ -321,9 +285,9 @@ namespace PoliX
             Bitmap pBitmapForPoints = Helper.BitmapImage2Bitmap(sourceBitmapPictures[0]);
             var graphics = Graphics.FromImage(pBitmapForPoints);
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            for (int i = 0; i < Nodes.Count; i++)
+            for (int i = 0; i < Points.Count; i++)
             {
-                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Nodes[i].point.x, (int)Nodes[i].point.y, 3, 3);
+                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Points[i].x, (int)Points[i].y, 3, 3);
             }
             sourceImg.Source = Helper.Bitmap2BitmapImage(pBitmapForPoints);
         }
@@ -351,9 +315,9 @@ namespace PoliX
             for (int s = 0; s < Triangles.Count; s++)
             {
                 graphics.FillPolygon(new System.Drawing.SolidBrush(Triangles[s].color),
-                                        new PointF[] {new PointF((float)Triangles[s].nodes[0].point.x, (float)Triangles[s].nodes[0].point.y),
-                                        new PointF((float)Triangles[s].nodes[1].point.x, (float)Triangles[s].nodes[1].point.y),
-                                        new PointF((float)Triangles[s].nodes[2].point.x, (float)Triangles[s].nodes[2].point.y)
+                                        new PointF[] {new PointF((float)Triangles[s].points[0].x, (float)Triangles[s].points[0].y),
+                                        new PointF((float)Triangles[s].points[1].x, (float)Triangles[s].points[1].y),
+                                        new PointF((float)Triangles[s].points[2].x, (float)Triangles[s].points[2].y)
                                         });
             }
             sourceImg.Source = Helper.Bitmap2BitmapImage(pointsBitmap);
@@ -404,9 +368,9 @@ namespace PoliX
                     for (int s = 0; s < Triangles.Count; s++)
                     {
                         graphics.FillPolygon(new System.Drawing.SolidBrush(Triangles[s].color),
-                                                new PointF[] {new PointF((float)Triangles[s].nodes[0].point.x, (float)Triangles[s].nodes[0].point.y),
-                                        new PointF((float)Triangles[s].nodes[1].point.x, (float)Triangles[s].nodes[1].point.y),
-                                        new PointF((float)Triangles[s].nodes[2].point.x, (float)Triangles[s].nodes[2].point.y)
+                                                new PointF[] {new PointF((float)Triangles[s].points[0].x, (float)Triangles[s].points[0].y),
+                                        new PointF((float)Triangles[s].points[1].x, (float)Triangles[s].points[1].y),
+                                        new PointF((float)Triangles[s].points[2].x, (float)Triangles[s].points[2].y)
                                                 });
                     }
 
