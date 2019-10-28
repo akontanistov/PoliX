@@ -25,7 +25,7 @@ namespace PoliX.Triangulation
             centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
         }
 
-        //Возвращает точку из T2 невходящую в T1
+       
         public static Vector2 Get4Point(Triangle T1, Triangle T2)
         {
             for (int i = 0; i < 3; i++)
@@ -33,6 +33,29 @@ namespace PoliX.Triangulation
                     return T2.points[i];
 
             return null;
+        }
+
+        //Возвращает 4 точки, где: [0] принадлежит T1, [1] и [2] общие, [3] принадлежит T2
+        public static Vector2[] Get4Point2(Triangle T1, Triangle T2)
+        {
+            Vector2[] Points = new Vector2[4];
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (T2.points[i] != T1.points[0] && T2.points[i] != T1.points[1] && T2.points[i] != T1.points[2])
+                    Points[3] = T2.points[i];
+
+                if (T1.points[i] != T2.points[0] && T1.points[i] != T2.points[1] && T1.points[i] != T2.points[2])
+                    Points[0] = T1.points[i];
+
+                if (T2.points[i] == T1.points[1])
+                    Points[1] = T2.points[i];
+                else if (T2.points[i] == T1.points[2])
+                    Points[2] = T2.points[i];
+
+            }
+
+            return Points;
         }
     }
 }

@@ -72,6 +72,10 @@ namespace PoliX.Triangulation
                     triangles.Add(NewTriangle1);
                     triangles.Add(NewTriangle2);
 
+                    CheckDelaunayAndRebuild(CurentTriangle);
+                    CheckDelaunayAndRebuild(NewTriangle1);
+                    CheckDelaunayAndRebuild(NewTriangle2);
+
 
                     //triangles.Remove(CurentTriangle);
                     //triangles.Add(new Triangle(CurentTriangle.points[0], CurentTriangle.points[1], _points[i]));
@@ -148,7 +152,7 @@ namespace PoliX.Triangulation
         static void CheckDelaunayAndRebuild(Triangle T1)
         {
             Triangle CurentTriang = null;
-            Vector2 CurentPoint = null;
+            Vector2[] CurentPoints = new Vector2[4];
 
             for (int i = 0; i < 3; i++)
             {
@@ -156,12 +160,18 @@ namespace PoliX.Triangulation
 
                 if (CurentTriang != null)
                 {
-                    CurentPoint = Triangle.Get4Point(T1, CurentTriang);
-                    if (CurentPoint != null)
-                        if (!IsDelaunay(T1.points[0], T1.points[1], T1.points[2], CurentPoint))
+                    CurentPoints = Triangle.Get4Point2(T1, CurentTriang);
+                    if (CurentPoints[0] != null && CurentPoints[1] != null && CurentPoints[2] != null && CurentPoints[3] != null)
+                        if (!IsDelaunay(CurentPoints[0], CurentPoints[0], CurentPoints[0], CurentPoints[0]))
                         {
+                            //Перестроение
+                            T1.points[0] = CurentPoints[0];
+                            T1.points[1] = CurentPoints[1];
+                            T1.points[2] = CurentPoints[3];
 
-
+                            CurentTriang.points[0] = CurentPoints[3];
+                            CurentTriang.points[1] = CurentPoints[2];
+                            CurentTriang.points[2] = CurentPoints[0];
                         }
 
                 }
