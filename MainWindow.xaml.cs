@@ -97,8 +97,8 @@ namespace PoliX
             Points.Add(new Vector2(widthSource, heightSource));
             Points.Add(new Vector2(0d, heightSource));
 
-            //Генерация случайных точек
-            for (int i = 0; i < pointsCount; i++)
+            ////Генерация случайных точек
+            for (int i = 0; i < pointsCount + 4; i++)
             {
                 Points.Add(Vector2.Vector2Rnd(0d, widthSource, 0d, heightSource));
                 Console.WriteLine(Points[i].x + " " + Points[i].y);
