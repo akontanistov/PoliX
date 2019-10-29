@@ -98,7 +98,7 @@ namespace PoliX
             Points.Add(new Vector2(0d, heightSource));
 
             ////Генерация случайных точек
-            for (int i = 0; i < pointsCount + 4; i++)
+            for (int i = 0; i < pointsCount; i++)
             {
                 Points.Add(Vector2.Vector2Rnd(0d, widthSource, 0d, heightSource));
                 Console.WriteLine(Points[i].x + " " + Points[i].y);
@@ -149,7 +149,7 @@ namespace PoliX
             int indexCol = Triangles.Count;
             for (int y = 0; y < indexCol; y++)
             {
-                Triangles[y].color = pointsBitmap.GetPixel((int)Triangles[y].centroid.x, (int)Triangles[y].centroid.y);
+                Triangles[y].color = pointsBitmap.GetPixel((int)Triangles[y].Centroid.x, (int)Triangles[y].Centroid.y);
             }
 
             //Отрисовка триангуляции на экран
@@ -163,8 +163,29 @@ namespace PoliX
                                         new PointF((float)Triangles[s].points[2].x, (float)Triangles[s].points[2].y)
                                         });
             }
- 
-            sourceImg.Source = Helper.Bitmap2BitmapImage(pointsBitmap);
+
+            for (int s = 0; s < Triangles.Count; s++)
+            {
+                for (int i = 0; i < 3; i++)
+                    if (Triangles[s].arcs[i].IsBorder)
+                    {
+                        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Red),
+                        (float)Triangles[s].arcs[i].A.x, (float)Triangles[s].arcs[i].A.y,
+                        (float)Triangles[s].arcs[i].B.x, (float)Triangles[s].arcs[i].B.y);
+                    }
+                for (int i = 0; i < 3; i++)
+                    if (Triangles[s].arcs[i].trAB != null && Triangles[s].arcs[i].trBA != null)
+                    {
+                        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Green),
+                        (float)Triangles[s].arcs[i].trAB.Centroid.x, (float)Triangles[s].arcs[i].trAB.Centroid.y,
+                        (float)Triangles[s].arcs[i].trBA.Centroid.x, (float)Triangles[s].arcs[i].trBA.Centroid.y);
+                    }
+            }
+
+
+
+
+                sourceImg.Source = Helper.Bitmap2BitmapImage(pointsBitmap);
         }
 
         private void b_saveAsSVG(object sender, RoutedEventArgs e)
@@ -305,7 +326,7 @@ namespace PoliX
             int indexCol = Triangles.Count;
             for (int y = 0; y < indexCol; y++)
             {
-                Triangles[y].color = pointsBitmap.GetPixel((int)Triangles[y].centroid.x, (int)Triangles[y].centroid.y);
+                Triangles[y].color = pointsBitmap.GetPixel((int)Triangles[y].Centroid.x, (int)Triangles[y].Centroid.y);
             }
 
 
@@ -354,7 +375,7 @@ namespace PoliX
                     int indexCol = Triangles.Count;
                     for (int y = 0; y < indexCol; y++)
                     {
-                        Triangles[y].color = pointsBitmap.GetPixel((int)Triangles[y].centroid.x, (int)Triangles[y].centroid.y);
+                        Triangles[y].color = pointsBitmap.GetPixel((int)Triangles[y].Centroid.x, (int)Triangles[y].Centroid.y);
 
                         ////Смещение точек триангуляции
                         //Triangles[y].points[0] += new Vector2(Help.RndRangeFloat(-5.05f, 5.05f), Help.RndRangeFloat(-5.05f, 5.05f));

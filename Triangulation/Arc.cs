@@ -79,6 +79,32 @@ namespace PoliX.Triangulation
                 return false;
         }
 
+        public static bool ArcIntersect(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
+        {
+
+            //Перепроверить CrossProduct
+            double d1 = Direction(p3, p4, p1);
+            double d2 = Direction(p3, p4, p2);
+            double d3 = Direction(p1, p2, p3);
+            double d4 = Direction(p1, p2, p4);
+
+            if (p1 == p3 || p1 == p4 || p2 == p3 || p2 == p4)
+                return false;
+            else if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &
+                     ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0)))
+                return true;
+            else if ((d1 == 0) && OnSegment(p3, p4, p1))
+                return true;
+            else if ((d2 == 0) && OnSegment(p3, p4, p2))
+                return true;
+            else if ((d3 == 0) && OnSegment(p1, p2, p3))
+                return true;
+            else if ((d4 == 0) && OnSegment(p1, p2, p4))
+                return true;
+            else
+                return false;
+        }
+
         public Vector2 GetSecondNode(Vector2 _firstnode)
         {
             if (A == _firstnode)
@@ -89,6 +115,15 @@ namespace PoliX.Triangulation
                 return null;
         }
 
+        public Triangle GetOtherTriangle(Triangle T1)
+        {
+            if (trAB == T1)
+                return trBA;
+            else if (trBA == T1)
+                return trAB;
+            else
+                return null;
+        }
         public static Vector2 GetCommonPoint(Arc a1, Arc a2)
         {
             if (a1.A == a2.A)
@@ -101,6 +136,18 @@ namespace PoliX.Triangulation
                 return a1.B;
             else
                 return null;
+        }
+
+        //Определяет, связаны ли ребра
+        public bool IsConnectedWith(Arc _a)
+        {
+            if (A == _a.A || A == _a.B)
+                return true;
+
+            if (B == _a.A || B == _a.B)
+                return true;
+
+            return false;
         }
 
         private static double Direction(Vector2 pi, Vector2 pj, Vector2 pk)

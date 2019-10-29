@@ -16,8 +16,17 @@ namespace PoliX.Triangulation
             points = _points;
             //Добавление суперструктуры
             triangles.Add(new Triangle(points[0], points[1], points[2]));
-            triangles.Add(new Triangle(points[0], points[2], points[3]));
+            triangles.Add(new Triangle(triangles[0].arcs[2], points[3]));
             //Добавление ссылок в ребра на смежные треугольники суперструктуры
+            triangles[0].arcs[2].trAB = triangles[1];
+            triangles[1].arcs[0].trBA = triangles[0];
+
+            //Vector2 v1 = new Vector2(0,0);
+            //Vector2 v2 = new Vector2(-1, 1);
+            //Vector2 v3 = new Vector2(1, 1);
+            //Vector2 v4 = new Vector2(0, 1.5);
+
+            //Console.WriteLine(IsDelaunay2(v1, v2, v3, v4));
 
             Triangle CurentTriangle = null;
             Triangle NewTriangle1 = null;
@@ -27,6 +36,7 @@ namespace PoliX.Triangulation
             Arc NewArc1 = null;
             Arc NewArc2 = null;
 
+            Arc OldArc0 = null;
             Arc OldArc1 = null;
             Arc OldArc2 = null;
 
@@ -43,7 +53,7 @@ namespace PoliX.Triangulation
                     NewArc2 = new Arc(CurentTriangle.points[2], _points[i]);
 
                     //Сохранение ребер преобразуемого треугольника
-                    //OldArc0 = CurentTriangle.GetArcBeatwen2Points(CurentTriangle.points[0], CurentTriangle.points[1]);
+                    OldArc0 = CurentTriangle.GetArcBeatwen2Points(CurentTriangle.points[0], CurentTriangle.points[1]);
                     OldArc1 = CurentTriangle.GetArcBeatwen2Points(CurentTriangle.points[1], CurentTriangle.points[2]);
                     OldArc2 = CurentTriangle.GetArcBeatwen2Points(CurentTriangle.points[2], CurentTriangle.points[0]);
 
@@ -67,10 +77,9 @@ namespace PoliX.Triangulation
                     triangles.Add(NewTriangle1);
                     triangles.Add(NewTriangle2);
 
-                    //CheckDelaunayAndRebuild(CurentTriangle);
-                    //CheckDelaunayAndRebuild(NewTriangle1);
-                    //CheckDelaunayAndRebuild(NewTriangle2);
-
+                  //CheckDelaunayAndRebuild(OldArc0);
+                  //CheckDelaunayAndRebuild(OldArc1);
+                  //CheckDelaunayAndRebuild(OldArc2);
                 }
 
             }
@@ -139,33 +148,137 @@ namespace PoliX.Triangulation
             }
         }
 
+        static bool IsDelaunay2(Vector2 v0, Vector2 v1, Vector2 v2, Vector2 v3)
+        {
+            double x0 = v0.x;
+            double y0 = v0.y;
+            double x1 = v1.x;
+            double y1 = v1.y;
+            double x2 = v3.x;
+            double y2 = v3.y;
+            double x3 = v2.x;
+            double y3 = v2.y;
+
+            double CosA = (x0 - x1) * (x0 - x3) + (y0 - y1) * (y0 - y3);
+            double CosB = (x2 - x1) * (x2 - x3) + (y2 - y1) * (y2 - y3);
+
+            if (CosA < 0 && CosB < 0)
+                return false;
+
+            if (CosA >= 0 && CosB >= 0)
+                return true;
+
+            double SinA = (x0 - x1) * (y0 - y3) - (x0 - x3) * (y0 - y1);
+            double SinB = (x2 - x3) * (y2 - y1) - (x2 - x1) * (y2 - y3);
+
+            if (SinA * CosB + CosA * SinB >= 0)
+                return true;
+            else
+                return false;
+
+        }
+
         static void CheckDelaunayAndRebuild(Triangle T1)
         {
             Triangle T2 = null;
             Vector2[] CurentPoints = new Vector2[4];
 
+            Arc T1A1 = null;
+            Arc T1A2 = null;
+            Arc T2A1 = null;
+            Arc T2A2 = null;
+
+            Arc CommonArc = null;
+
             for (int i = 0; i < 3; i++)
             {
-                T2 = T1.triangles[i];
+                CommonArc = T1.arcs[i];
+                T2 = CommonArc.GetOtherTriangle(T1);
 
                 if (T2 != null)
                 {
                     CurentPoints = Triangle.Get4Point2(T1, T2);
                     if (CurentPoints[0] != null && CurentPoints[1] != null && CurentPoints[2] != null && CurentPoints[3] != null)
-                        if (!IsDelaunay(CurentPoints[0], CurentPoints[0], CurentPoints[0], CurentPoints[0]))
-                        {
-                            //Перестроение
-                            T1.points[0] = CurentPoints[0];
-                            T1.points[1] = CurentPoints[1];
-                            T1.points[2] = CurentPoints[3];
+                        //if (Arc.ArcIntersect(CurentPoints[0], CurentPoints[3], CurentPoints[1], CurentPoints[2]))
+                            if (!IsDelaunay(CurentPoints[0], CurentPoints[1], CurentPoints[2], CurentPoints[3]))
+                            {
 
-                            T2.points[0] = CurentPoints[3];
-                            T2.points[1] = CurentPoints[2];
-                            T2.points[2] = CurentPoints[0];
-                        }
+                                T1.GetTwoOtherArcs(CommonArc, out T1A1, out T1A2);
+                                T2.GetTwoOtherArcs(CommonArc, out T2A1, out T2A2);
 
+                                if (T1A1.IsConnectedWith(T2A1))
+                                {T1.arcs[1] = T1A1; T1.arcs[2] = T2A1;}
+                                else if(T1A1.IsConnectedWith(T2A2))
+                                { T1.arcs[1] = T1A1; T1.arcs[2] = T2A2; }
+
+                                if (T1A2.IsConnectedWith(T2A1))
+                                { T2.arcs[1] = T1A2; T2.arcs[2] = T2A1; }
+                                else if (T1A2.IsConnectedWith(T2A2))
+                                { T2.arcs[1] = T1A2; T2.arcs[2] = T2A2; }
+
+                                T1.arcs[0] = CommonArc;
+                                T2.arcs[0] = CommonArc;
+
+                                CommonArc.A = CurentPoints[0];
+                                CommonArc.B = CurentPoints[3];
+                            }
                 }
             }
+
+        }
+
+
+        static void CheckDelaunayAndRebuild(Arc arc)
+        {
+            Triangle T1 = null;
+            Triangle T2 = null;
+
+            if (arc.trAB != null && arc.trBA != null)
+            {
+                T1 = arc.trAB;
+                T2 = arc.trBA;
+            }
+            else
+                return;
+
+
+            Vector2[] CurentPoints = new Vector2[4];
+
+            Arc T1A1 = null;
+            Arc T1A2 = null;
+            Arc T2A1 = null;
+            Arc T2A2 = null;
+
+            CurentPoints[0] = T1.GetThirdPoint(arc);
+            CurentPoints[1] = arc.A;
+            CurentPoints[2] = arc.B;
+            CurentPoints[3] = T2.GetThirdPoint(arc);
+
+
+            //if (CurentPoints[0] != null && CurentPoints[1] != null && CurentPoints[2] != null && CurentPoints[3] != null)
+            if (Arc.ArcIntersect(CurentPoints[0], CurentPoints[3], CurentPoints[1], CurentPoints[2]))
+            if (!IsDelaunay(CurentPoints[0], CurentPoints[1], CurentPoints[2], CurentPoints[3]))
+                {
+
+                    T1.GetTwoOtherArcs(arc, out T1A1, out T1A2);
+                    T2.GetTwoOtherArcs(arc, out T2A1, out T2A2);
+
+                    if (T1A1.IsConnectedWith(T2A1))
+                    { T1.arcs[1] = T1A1; T1.arcs[2] = T2A1; }
+                    else if (T1A1.IsConnectedWith(T2A2))
+                    { T1.arcs[1] = T1A1; T1.arcs[2] = T2A2; }
+
+                    if (T1A2.IsConnectedWith(T2A1))
+                    { T2.arcs[1] = T1A2; T2.arcs[2] = T2A1; }
+                    else if (T1A2.IsConnectedWith(T2A2))
+                    { T2.arcs[1] = T1A2; T2.arcs[2] = T2A2; }
+
+                    T1.arcs[0] = arc;
+                    T2.arcs[0] = arc;
+
+                    arc.A = CurentPoints[0];
+                    arc.B = CurentPoints[3];
+                }
 
         }
     }

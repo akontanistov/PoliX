@@ -10,9 +10,18 @@ namespace PoliX.Triangulation
     {
         public Vector2[] points = new Vector2[3];
         public Arc[] arcs = new Arc[3];
-        public Triangle[] triangles = new Triangle[3];
+        //public Triangle[] triangles = new Triangle[3];
 
-        public Vector2 centroid;
+        public Vector2 Centroid
+        {
+            get
+            {
+                return points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
+            }
+
+            set
+            { }
+        }
 
         public System.Drawing.Color color;
 
@@ -27,7 +36,7 @@ namespace PoliX.Triangulation
             arcs[1] = new Arc(_b, _c);
             arcs[2] = new Arc(_c, _a);
 
-            centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
+            //centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
         }
 
         public Triangle(Arc _arc, Vector2 _a)
@@ -40,7 +49,7 @@ namespace PoliX.Triangulation
             arcs[1] = new Arc(points[1], points[2]);
             arcs[2] = new Arc(points[2], points[0]);
 
-            centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
+            //centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
         }
 
         public Triangle(Arc _arc0, Arc _arc1, Arc _arc2)
@@ -69,7 +78,16 @@ namespace PoliX.Triangulation
 
             }
 
-            centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
+            //Centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
+        }
+
+        public Vector2 GetThirdPoint(Arc _arc)
+        {
+            for(int i = 0; i < 3; i++)
+                if (_arc.A != points[i] && _arc.B != points[i])
+                    return points[i];
+
+            return null;
         }
 
         public Arc GetArcBeatwen2Points(Vector2 _a, Vector2 _b)
@@ -89,6 +107,18 @@ namespace PoliX.Triangulation
                     return T2.points[i];
 
             return null;
+        }
+
+        public void GetTwoOtherArcs(Arc _a0, out Arc _a1, out Arc _a2)
+        {
+            if (arcs[0] == _a0)
+            { _a1 = arcs[1]; _a2 = arcs[2]; }
+            else if(arcs[1] == _a0)
+            { _a1 = arcs[0]; _a2 = arcs[2]; }
+            else if (arcs[2] == _a0)
+            { _a1 = arcs[0]; _a2 = arcs[1]; }
+            else
+            { _a1 = null; _a2 = null; }
         }
 
         //Возвращает 4 точки, где: [0] принадлежит T1, [1] и [2] общие, [3] принадлежит T2
