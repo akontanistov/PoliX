@@ -10,7 +10,6 @@ namespace PoliX.Triangulation
     {
         public Vector2[] points = new Vector2[3];
         public Arc[] arcs = new Arc[3];
-        //public Triangle[] triangles = new Triangle[3];
 
         public Vector2 Centroid
         {
@@ -35,8 +34,6 @@ namespace PoliX.Triangulation
             arcs[0] = new Arc(_a,_b);
             arcs[1] = new Arc(_b, _c);
             arcs[2] = new Arc(_c, _a);
-
-            //centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
         }
 
         public Triangle(Arc _arc, Vector2 _a)
@@ -48,8 +45,6 @@ namespace PoliX.Triangulation
             arcs[0] = _arc;
             arcs[1] = new Arc(points[1], points[2]);
             arcs[2] = new Arc(points[2], points[0]);
-
-            //centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
         }
 
         public Triangle(Arc _arc0, Arc _arc1, Arc _arc2)
@@ -75,10 +70,8 @@ namespace PoliX.Triangulation
                 Console.WriteLine("ARC2.B: " + _arc2.B.x + " " + _arc2.B.y);
 
                 throw new Exception("Попытка создать треугольник из трех непересекающихся ребер");
-
             }
 
-            //Centroid = points[2] - ((points[2] - (points[0] + ((points[1] - points[0]) * 0.5))) * 0.6666666);
         }
 
         public Vector2 GetThirdPoint(Arc _arc)

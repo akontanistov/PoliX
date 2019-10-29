@@ -101,9 +101,21 @@ namespace PoliX
             for (int i = 0; i < pointsCount; i++)
             {
                 Points.Add(Vector2.Vector2Rnd(0d, widthSource, 0d, heightSource));
-                Console.WriteLine(Points[i].x + " " + Points[i].y);
+                //Console.WriteLine(Points[i].x + " " + Points[i].y);
             }
             Console.WriteLine(" ");
+
+            //double devider1 = widthSource / 50;
+            //double devider2 = heightSource / 50;
+            //for (int i = 1; i < 49; i++)
+            //{
+            //    Points.Add(new Vector2(devider1 * (double)i, 0));
+            //    Points.Add(new Vector2(devider1 * (double)i, heightSource-1));
+
+            //    Points.Add(new Vector2(0, devider2 * (double)i));
+            //    Points.Add(new Vector2(widthSource-1, devider2 * (double)i));
+            //}
+            //Console.WriteLine(" ");
 
             //Отрисовка карты точек
             if (debug)
@@ -174,12 +186,19 @@ namespace PoliX
                         (float)Triangles[s].arcs[i].B.x, (float)Triangles[s].arcs[i].B.y);
                     }
                 for (int i = 0; i < 3; i++)
-                    if (Triangles[s].arcs[i].trAB != null && Triangles[s].arcs[i].trBA != null)
+                    if (Triangles[s].arcs[i].ID == 1)
                     {
-                        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Green),
-                        (float)Triangles[s].arcs[i].trAB.Centroid.x, (float)Triangles[s].arcs[i].trAB.Centroid.y,
-                        (float)Triangles[s].arcs[i].trBA.Centroid.x, (float)Triangles[s].arcs[i].trBA.Centroid.y);
+                        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Yellow, 5),
+                        (float)Triangles[s].arcs[i].A.x, (float)Triangles[s].arcs[i].A.y,
+                        (float)Triangles[s].arcs[i].B.x, (float)Triangles[s].arcs[i].B.y);
                     }
+                //for (int i = 0; i < 3; i++)
+                //    if (Triangles[s].arcs[i].trAB != null && Triangles[s].arcs[i].trBA != null)
+                //    {
+                //        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Green),
+                //        (float)Triangles[s].arcs[i].trAB.Centroid.x, (float)Triangles[s].arcs[i].trAB.Centroid.y,
+                //        (float)Triangles[s].arcs[i].trBA.Centroid.x, (float)Triangles[s].arcs[i].trBA.Centroid.y);
+                //    }
             }
 
 

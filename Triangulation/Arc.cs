@@ -15,6 +15,8 @@ namespace PoliX.Triangulation
 
         public Vector2 AB;
 
+        public int ID = 0;
+
         //Ссылка на треугольники в которые входит ребро
         public Triangle trAB;
         public Triangle trBA;
