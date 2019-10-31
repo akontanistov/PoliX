@@ -11,9 +11,14 @@ namespace PoliX.Triangulation
         public List<Vector2> points = new List<Vector2>();
         public List<Triangle> triangles = new List<Triangle>();
 
+        private DynamicCache Cache = null;
+
         public Triangulation(List<Vector2> _points)
         {
             points = _points;
+
+            //Инициализация кэша
+            Cache = new DynamicCache(points[2]);
 
             //Добавление суперструктуры
             triangles.Add(new Triangle(points[0], points[1], points[2]));
@@ -23,6 +28,9 @@ namespace PoliX.Triangulation
             triangles[0].arcs[2].trAB = triangles[1];
             triangles[1].arcs[0].trBA = triangles[0];
 
+            //Добавление суперструктуры в кэш
+            Cache.Add(triangles[0]);
+            Cache.Add(triangles[1]);
 
             Triangle CurentTriangle = null;
             Triangle NewTriangle0 = null;
@@ -53,8 +61,16 @@ namespace PoliX.Triangulation
                     OldArc1 = CurentTriangle.GetArcBeatwen2Points(CurentTriangle.points[1], CurentTriangle.points[2]);
                     OldArc2 = CurentTriangle.GetArcBeatwen2Points(CurentTriangle.points[2], CurentTriangle.points[0]);
 
+                    //Преобразование текущего треугольника в один из новых трех
+                    NewTriangle0 = CurentTriangle;
+                    NewTriangle0.arcs[0] = OldArc0;
+                    NewTriangle0.arcs[1] = NewArc1;
+                    NewTriangle0.arcs[2] = NewArc0;
+                    NewTriangle0.points[2] = _points[i];
+
+
                     //Дополнительно создаются два треугольника
-                    NewTriangle0 = new Triangle(OldArc0, NewArc1, NewArc0);
+                    //NewTriangle0 = new Triangle(OldArc0, NewArc1, NewArc0);
                     NewTriangle1 = new Triangle(OldArc1, NewArc2, NewArc1);
                     NewTriangle2 = new Triangle(OldArc2, NewArc0, NewArc2);
 
@@ -82,11 +98,16 @@ namespace PoliX.Triangulation
                     if (OldArc2.trBA == CurentTriangle)
                         OldArc2.trBA = NewTriangle2;
 
-                    triangles.Remove(CurentTriangle);
+                    //triangles.Remove(CurentTriangle);
 
-                    triangles.Add(NewTriangle0);
+                    //triangles.Add(NewTriangle0);
                     triangles.Add(NewTriangle1);
                     triangles.Add(NewTriangle2);
+
+                    //Добавление треугольников в кэш
+                    Cache.Add(NewTriangle0);
+                    Cache.Add(NewTriangle1);
+                    Cache.Add(NewTriangle2);
 
                     CheckDelaunayAndRebuild(OldArc0);
                     CheckDelaunayAndRebuild(OldArc1);
@@ -94,12 +115,30 @@ namespace PoliX.Triangulation
                 }
 
             }
+
+
+            //Дополнительный проход
+            for (int i = 0; i < triangles.Count; i++)
+            {
+                CheckDelaunayAndRebuild(triangles[i].arcs[0]);
+                CheckDelaunayAndRebuild(triangles[i].arcs[1]);
+                CheckDelaunayAndRebuild(triangles[i].arcs[2]);
+            }
+
         }
 
         //Возвращает триугольник в котором находится данная точка
         private Triangle GetTriangleForPoint(Vector2 _point)
         {
-            for(int i = 0; i < triangles.Count; i++)
+            Triangle link = Cache.FindTriangle(_point);
+
+            if (link != null)
+                if (IsPointInTriangle(link, _point))
+                {
+                    return link;
+                }
+
+            for (int i = 0; i < triangles.Count; i++)
             {
                 if (IsPointInTriangle(triangles[i], _point))
                     return triangles[i];
@@ -268,12 +307,16 @@ namespace PoliX.Triangulation
                         else if (NewArcT1A2.trBA == T2)
                             NewArcT1A2.trBA = T1;
 
-                        //косяк
                         if (NewArcT2A1.trAB == T1)
                             NewArcT2A1.trAB = T2;
                         else if (NewArcT2A1.trBA == T1)
                             NewArcT2A1.trBA = T2;
-                    }
+
+                    //Добавление треугольников в кэш
+                    Cache.Add(T1);
+                    Cache.Add(T2);
+
+                }
         }
     }
 }
