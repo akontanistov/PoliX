@@ -78,7 +78,6 @@
     <Compile Include="Helper.cs" />
     <Compile Include="Triangulation\Arc.cs" />
     <Compile Include="Triangulation\DynamicCache.cs" />
-    <Compile Include="Triangulation\Node.cs" />
     <Compile Include="Triangulation\Triangle.cs" />
     <Compile Include="Triangulation\Triangulation.cs" />
     <Compile Include="Triangulation\Vector2.cs" />

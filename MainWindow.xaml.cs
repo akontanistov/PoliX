@@ -28,8 +28,6 @@ namespace PoliX
     {
         bool debug = true;
 
-
-        //BitmapImage предсавление основного источника, не изменяется, используется только для чтения
         List<BitmapImage> sourceBitmapPictures;
         BitmapImage sourceBitmapPicture;
         Bitmap pointsBitmap;
@@ -97,25 +95,12 @@ namespace PoliX
             Points.Add(new Vector2(widthSource, heightSource));
             Points.Add(new Vector2(0d, heightSource));
 
-            ////Генерация случайных точек
+            //Генерация случайных точек
             for (int i = 0; i < pointsCount; i++)
             {
                 Points.Add(Vector2.Vector2Rnd(0d, widthSource, 0d, heightSource));
-                //Console.WriteLine(Points[i].x + " " + Points[i].y);
             }
             Console.WriteLine(" ");
-
-            //double devider1 = widthSource / 50;
-            //double devider2 = heightSource / 50;
-            //for (int i = 1; i < 49; i++)
-            //{
-            //    Points.Add(new Vector2(devider1 * (double)i, 0));
-            //    Points.Add(new Vector2(devider1 * (double)i, heightSource-1));
-
-            //    Points.Add(new Vector2(0, devider2 * (double)i));
-            //    Points.Add(new Vector2(widthSource-1, devider2 * (double)i));
-            //}
-            //Console.WriteLine(" ");
 
             //Отрисовка карты точек
             if (debug)
@@ -126,19 +111,10 @@ namespace PoliX
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             for (int i = 0; i < Points.Count; i++)
             {
-                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.Gold), (int)Points[i].x-5, (int)Points[i].y-5, 10, 10);
+                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Points[i].x-3, (int)Points[i].y-3, 6, 6);
             }
             sourceImg.Source = Helper.Bitmap2BitmapImage(pBitmapForPoints);
 
-            //pointsBitmap = Help.BitmapImage2Bitmap(sourceBitmapPicture);
-            //for (int i = 0; i < Points.Count; i++)
-            //{
-            //    int x = (int)Points[i].x;
-            //    int y = (int)Points[i].y;
-            //    if(x >= 0 && y >= 0 & x < WeightSource && y < HeightSource)
-            //        pointsBitmap.SetPixel(x, y, System.Drawing.Color.Red);
-            //}
-            //sourceImg.Source = Help.Bitmap2BitmapImage(pointsBitmap);
         }
 
         private void b_triangulation(object sender, RoutedEventArgs e)
@@ -176,35 +152,7 @@ namespace PoliX
                                         });
             }
 
-            for (int s = 0; s < Triangles.Count; s++)
-            {
-                for (int i = 0; i < 3; i++)
-                    if (Triangles[s].arcs[i].IsBorder)
-                    {
-                        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Red),
-                        (float)Triangles[s].arcs[i].A.x, (float)Triangles[s].arcs[i].A.y,
-                        (float)Triangles[s].arcs[i].B.x, (float)Triangles[s].arcs[i].B.y);
-                    }
-                for (int i = 0; i < 3; i++)
-                    if (Triangles[s].arcs[i].ID == 1)
-                    {
-                        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Yellow, 5),
-                        (float)Triangles[s].arcs[i].A.x, (float)Triangles[s].arcs[i].A.y,
-                        (float)Triangles[s].arcs[i].B.x, (float)Triangles[s].arcs[i].B.y);
-                    }
-                //for (int i = 0; i < 3; i++)
-                //    if (Triangles[s].arcs[i].trAB != null && Triangles[s].arcs[i].trBA != null)
-                //    {
-                //        graphics.DrawLine(new System.Drawing.Pen(System.Drawing.Color.Green),
-                //        (float)Triangles[s].arcs[i].trAB.Centroid.x, (float)Triangles[s].arcs[i].trAB.Centroid.y,
-                //        (float)Triangles[s].arcs[i].trBA.Centroid.x, (float)Triangles[s].arcs[i].trBA.Centroid.y);
-                //    }
-            }
-
-
-
-
-                sourceImg.Source = Helper.Bitmap2BitmapImage(pointsBitmap);
+            sourceImg.Source = Helper.Bitmap2BitmapImage(pointsBitmap);
         }
 
         private void b_saveAsSVG(object sender, RoutedEventArgs e)

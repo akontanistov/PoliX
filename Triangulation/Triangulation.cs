@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace PoliX.Triangulation
 {
+    //Триангуляция имеет структуру: точки, ребра, треугольники
+    //Триангуляция выполняется по итерационному алгоритму с динамическим кешированием
     public class Triangulation
     {
         public List<Vector2> points = new List<Vector2>();
@@ -68,9 +72,7 @@ namespace PoliX.Triangulation
                     NewTriangle0.arcs[2] = NewArc0;
                     NewTriangle0.points[2] = _points[i];
 
-
                     //Дополнительно создаются два треугольника
-                    //NewTriangle0 = new Triangle(OldArc0, NewArc1, NewArc0);
                     NewTriangle1 = new Triangle(OldArc1, NewArc2, NewArc1);
                     NewTriangle2 = new Triangle(OldArc2, NewArc0, NewArc2);
 
@@ -98,13 +100,10 @@ namespace PoliX.Triangulation
                     if (OldArc2.trBA == CurentTriangle)
                         OldArc2.trBA = NewTriangle2;
 
-                    //triangles.Remove(CurentTriangle);
 
-                    //triangles.Add(NewTriangle0);
                     triangles.Add(NewTriangle1);
                     triangles.Add(NewTriangle2);
 
-                    //Добавление треугольников в кэш
                     Cache.Add(NewTriangle0);
                     Cache.Add(NewTriangle1);
                     Cache.Add(NewTriangle2);
@@ -116,7 +115,6 @@ namespace PoliX.Triangulation
 
             }
 
-
             //Дополнительный проход
             for (int i = 0; i < triangles.Count; i++)
             {
@@ -124,7 +122,6 @@ namespace PoliX.Triangulation
                 CheckDelaunayAndRebuild(triangles[i].arcs[1]);
                 CheckDelaunayAndRebuild(triangles[i].arcs[2]);
             }
-
         }
 
         //Возвращает триугольник в котором находится данная точка
@@ -132,17 +129,46 @@ namespace PoliX.Triangulation
         {
             Triangle link = Cache.FindTriangle(_point);
 
-            if (link != null)
+            if (link == null)
+            {
+                link = triangles[0];
+            }
+
                 if (IsPointInTriangle(link, _point))
                 {
                     return link;
                 }
+                else
+                {
+                    //Путь от некоторого треугольниа до искомой точки
+                    Arc way = new Arc(_point, link.Centroid);
+                    Arc CurentArc = null;
 
-            for (int i = 0; i < triangles.Count; i++)
-            {
-                if (IsPointInTriangle(triangles[i], _point))
-                    return triangles[i];
-            }
+                    while (!IsPointInTriangle(link, _point))
+                    {
+                        CurentArc = GetIntersectedArc(way, link);
+                        if (link != CurentArc.trAB)
+                            link = CurentArc.trAB;
+                        else
+                            link = CurentArc.trBA;
+
+                        way = new Arc(_point, link.Centroid);
+                    }
+                    return link;
+
+                }
+        }
+
+        //Возвращает ребро треугольника которое пересекается с линией
+        private Arc GetIntersectedArc(Arc Line, Triangle Target)
+        {
+            if (Arc.ArcIntersect(Target.arcs[0], Line))
+                return Target.arcs[0];
+            if (Arc.ArcIntersect(Target.arcs[1], Line))
+                return Target.arcs[1];
+            if (Arc.ArcIntersect(Target.arcs[2], Line))
+                return Target.arcs[2];
+
             return null;
         }
 
@@ -164,7 +190,7 @@ namespace PoliX.Triangulation
         }
 
         //Вычисление критерия Делоне по описанной окружности
-        static bool IsDelaunay(Vector2 A, Vector2 B, Vector2 C, Vector2 _CheckNode)
+        private bool IsDelaunay(Vector2 A, Vector2 B, Vector2 C, Vector2 _CheckNode)
         {
             double x0 = _CheckNode.x;
             double y0 = _CheckNode.y;
@@ -200,7 +226,7 @@ namespace PoliX.Triangulation
         }
 
         //Вычисление критерия Делоне по противолежащим углам
-        static bool IsDelaunay2(Vector2 v0, Vector2 v1, Vector2 v2, Vector2 v3)
+        private bool IsDelaunay2(Vector2 v0, Vector2 v1, Vector2 v2, Vector2 v3)
         {
             double x0 = v0.x;
             double y0 = v0.y;

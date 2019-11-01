@@ -24,7 +24,6 @@ namespace PoliX.Triangulation
 
         public System.Drawing.Color color;
 
-        //Организовать автоматический перерасчет центроида при изменении точек, использовать свойства
         public Triangle(Vector2 _a, Vector2 _b, Vector2 _c)
         {
             points[0] = _a;

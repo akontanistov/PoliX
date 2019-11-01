@@ -13,15 +13,9 @@ namespace PoliX.Triangulation
         public Vector2 A;
         public Vector2 B;
 
-        public Vector2 AB;
-
-        public int ID = 0;
-
         //Ссылка на треугольники в которые входит ребро
         public Triangle trAB;
         public Triangle trBA;
-
-        public double sqrMagnitude;
 
         //Ребро является границей триангуляции если не ссылается на 2 треугольника
         public bool IsBorder
@@ -36,18 +30,10 @@ namespace PoliX.Triangulation
             set { }
         }
 
-        public Arc()
-        { }
-
         public Arc(Vector2 _A, Vector2 _B)
         {
             A = _A;
             B = _B;
-
-
-            AB = A - B;
-
-            sqrMagnitude = AB.x * AB.x + AB.y * AB.y;
         }
 
         public static bool ArcIntersect(Arc a1, Arc a2)
@@ -126,6 +112,7 @@ namespace PoliX.Triangulation
             else
                 return null;
         }
+
         public static Vector2 GetCommonPoint(Arc a1, Arc a2)
         {
             if (a1.A == a2.A)

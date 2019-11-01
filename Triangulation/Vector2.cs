@@ -48,7 +48,6 @@ namespace PoliX
             return new Vector2(_a.x * s, _a.y * s);
         }
 
-        //Ошибка?
         public static double CrossProduct(Vector2 v1, Vector2 v2) //Векторное произведение
         {
             return v1.x * v2.y - v2.x * v1.y;
