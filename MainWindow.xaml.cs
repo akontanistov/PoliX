@@ -218,8 +218,6 @@ namespace PoliX
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////////
-
         private void b_loadImgs(object sender, RoutedEventArgs e)
         {
             refreshSystem();
@@ -249,125 +247,6 @@ namespace PoliX
                 if (sourceBitmapPictures[0] != null)
                 {
                     sourceImg.Source = sourceBitmapPictures[0];
-                }
-            }
-        }
-
-        private void b_loadPoints2(object sender, RoutedEventArgs e)
-        {
-            if (debug)
-                Console.WriteLine("Создание точек");
-
-            pointsCount = Int32.Parse(tbPoints2.Text);
-
-            if (sourceBitmapPictures[0] != null)
-            {
-                widthSource = (float)(sourceBitmapPictures[0].PixelWidth);
-                heightSource = (float)(sourceBitmapPictures[0].PixelHeight);
-            }
-
-            //Отрисовка карты точек первого рисунка
-            if (debug)
-                Console.WriteLine("Отрисовка точек");
-
-            Bitmap pBitmapForPoints = Helper.BitmapImage2Bitmap(sourceBitmapPictures[0]);
-            var graphics = Graphics.FromImage(pBitmapForPoints);
-            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            for (int i = 0; i < Points.Count; i++)
-            {
-                graphics.FillEllipse(new System.Drawing.SolidBrush(System.Drawing.Color.SkyBlue), (int)Points[i].x, (int)Points[i].y, 3, 3);
-            }
-            sourceImg.Source = Helper.Bitmap2BitmapImage(pBitmapForPoints);
-        }
-
-        private void b_triangulation2(object sender, RoutedEventArgs e)
-        {
-            if (debug)
-                Console.WriteLine("Начало триангуляции:");
-
-            //Запуск процесса триангуляции
-            pointsBitmap = Helper.BitmapImage2Bitmap(sourceBitmapPictures[0]);
-
-
-            //Расскрашивание треугольников
-            int indexCol = Triangles.Count;
-            for (int y = 0; y < indexCol; y++)
-            {
-                Triangles[y].color = pointsBitmap.GetPixel((int)Triangles[y].Centroid.x, (int)Triangles[y].Centroid.y);
-            }
-
-
-            //Отрисовка триангуляции на экран
-            var graphics = Graphics.FromImage(pointsBitmap);
-            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            for (int s = 0; s < Triangles.Count; s++)
-            {
-                graphics.FillPolygon(new System.Drawing.SolidBrush(Triangles[s].color),
-                                        new PointF[] {new PointF((float)Triangles[s].points[0].x, (float)Triangles[s].points[0].y),
-                                        new PointF((float)Triangles[s].points[1].x, (float)Triangles[s].points[1].y),
-                                        new PointF((float)Triangles[s].points[2].x, (float)Triangles[s].points[2].y)
-                                        });
-            }
-            sourceImg.Source = Helper.Bitmap2BitmapImage(pointsBitmap);
-
-            if (debug)
-            {
-                Console.WriteLine("100,00%");
-                Console.WriteLine("Конец триангуляции:");
-            }
-        }
-
-        private void b_saveAsPNGs(object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.SaveFileDialog sdlg = new Microsoft.Win32.SaveFileDialog();
-            sdlg.FileName = "PicPNG"; // Default file name
-            sdlg.Filter = "Рисунок PNG (.PNG)|*.png"; // Filter files by extension
-            sdlg.RestoreDirectory = true;
-
-            Nullable<bool> resultWr = sdlg.ShowDialog();
-
-            if (resultWr == true)
-            {
-                if (debug)
-                    Console.WriteLine("Начало сохранения файлов");
-
-                for (int i = 0; i < sourceBitmapPictures.Count; i++)
-                {
-                    if (debug)
-                        Console.WriteLine(i + "/" + sourceBitmapPictures.Count);
-
-                    pointsBitmap = Helper.BitmapImage2Bitmap(sourceBitmapPictures[i]);
-
-                    //Расскрашивание треугольников
-                    int indexCol = Triangles.Count;
-                    for (int y = 0; y < indexCol; y++)
-                    {
-                        Triangles[y].color = pointsBitmap.GetPixel((int)Triangles[y].Centroid.x, (int)Triangles[y].Centroid.y);
-
-                        ////Смещение точек триангуляции
-                        //Triangles[y].points[0] += new Vector2(Help.RndRangeFloat(-5.05f, 5.05f), Help.RndRangeFloat(-5.05f, 5.05f));
-                        //Triangles[y].points[1] += new Vector2(Help.RndRangeFloat(-5.05f, 5.05f), Help.RndRangeFloat(-5.05f, 5.05f));
-                        //Triangles[y].points[2] += new Vector2(Help.RndRangeFloat(-5.05f, 5.05f), Help.RndRangeFloat(-5.05f, 5.05f));
-                    }
-
-                    //Отрисовка триангуляции в буфер
-                    Graphics graphics = Graphics.FromImage(pointsBitmap);
-                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                    for (int s = 0; s < Triangles.Count; s++)
-                    {
-                        graphics.FillPolygon(new System.Drawing.SolidBrush(Triangles[s].color),
-                                                new PointF[] {new PointF((float)Triangles[s].points[0].x, (float)Triangles[s].points[0].y),
-                                        new PointF((float)Triangles[s].points[1].x, (float)Triangles[s].points[1].y),
-                                        new PointF((float)Triangles[s].points[2].x, (float)Triangles[s].points[2].y)
-                                                });
-                    }
-
-                    //Сохранение буфера
-                    pointsBitmap.Save(sdlg.FileName.Substring(0, sdlg.FileName.Length - 4) + i + ".png", System.Drawing.Imaging.ImageFormat.Png);
-
-                    graphics.Dispose();
-                    pointsBitmap.Dispose();
-                    System.GC.Collect();
                 }
             }
         }

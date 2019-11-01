@@ -19,13 +19,6 @@
                 <Button x:Name="button1" BorderBrush="SkyBlue" Content="Triangulation" HorizontalAlignment="Left" Margin="50,100,0,0" VerticalAlignment="Top" Width="100" Click="b_triangulation"/>
                 <Button x:Name="button3" BorderBrush="SkyBlue" Content="Save as SVG" HorizontalAlignment="Left" Margin="50,130,0,0" VerticalAlignment="Top" Width="100" Click="b_saveAsSVG"/>
                 <Button x:Name="button4" BorderBrush="SkyBlue" Content="Save as PNG" HorizontalAlignment="Left" Margin="50,160,0,0" VerticalAlignment="Top" Width="100" Click="b_saveAsPNG"/>
-
-                <Button x:Name="button5" BorderBrush="SkyBlue" Content="Load images" Margin="50,220,0,0" VerticalAlignment="Top" Click="b_loadImgs" HorizontalAlignment="Left" Width="102"/>
-                <TextBox x:Name="tbPoints2" BorderBrush="SkyBlue" HorizontalAlignment="Left" Height="20" Margin="101,250,0,0" TextWrapping="Wrap" Text="50000" VerticalAlignment="Top" Width="50"/>
-                <Label x:Name="label2" Content="Points:" HorizontalAlignment="Left" Margin="50,245,0,0" VerticalAlignment="Top" Width="50" Height="26"/>
-                <Button x:Name="button6" BorderBrush="SkyBlue" Content="Generate points" Margin="50,280,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="102" Click="b_loadPoints2"/>
-                <Button x:Name="button7" BorderBrush="SkyBlue" Content="Triangulation" HorizontalAlignment="Left" Margin="50,310,0,0" VerticalAlignment="Top" Width="100" Click="b_triangulation2"/>
-                <Button x:Name="button8" BorderBrush="SkyBlue" Content="Save as PNGs" HorizontalAlignment="Left" Margin="50,340,0,0" VerticalAlignment="Top" Width="100" Click="b_saveAsPNGs"/>
             </Grid>
         </Border>
     </Grid>
